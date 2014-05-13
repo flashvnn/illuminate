@@ -61,6 +61,12 @@ class DatabaseStoreDrupal implements StoreInterface {
   {
     $prefixed = $this->prefix.$key;
     $cache = cache_get($prefixed, $this->table);
+    if ($cache) {
+      if (time() >= $cache->expire)
+      {
+        return $this->forget($key);
+      }
+    }
 
     return $cache ? $cache->data: null;
 /*    $prefixed = $this->prefix.$key;
@@ -177,7 +183,7 @@ class DatabaseStoreDrupal implements StoreInterface {
   public function forget($key)
   {
     $key = $this->prefix.$key;
-    cache_clear_all($key);
+    cache_clear_all($key, $this->table);
     //$this->table()->where('cid', '=', $this->prefix.$key)->delete();
   }
 
