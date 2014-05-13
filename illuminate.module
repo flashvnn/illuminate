@@ -63,7 +63,7 @@ function illuminate_modules($base_module = 'laravel', $config_file = ''){
 function illuminate_realpath($file){
   $theme_path = dirname($GLOBALS['theme_info']->filename);
   $file = trim($file);
-  $file = str_replace('[theme]', $theme_path, $file);
+  $file = str_replace('{theme}', $theme_path, $file);
 
   $matches = array();
   $types = array('module', 'theme', 'library');
