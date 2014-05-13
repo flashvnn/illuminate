@@ -1,0 +1,108 @@
+<?php
+/**
+ * @file
+ * Laravel components integration with Drupal.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function illuminate_init() {
+  illuminate_load_instance();
+}
+
+/**
+ * Load laravel application instance.
+ */
+function illuminate_load_instance(){
+  static $loaded = false;
+  if(!$loaded){
+    composer_manager_register_autoloader();
+    if(class_exists('\\Drupal\\Laravel\\Application')){
+      $app = new \Drupal\Laravel\Application(__DIR__);
+      $app['path.storage'] = variable_get('file_public_path', conf_path() . '/files');
+      $loaded = TRUE;
+    }else{
+      illuminate_warning();
+    }
+  }
+
+  return $loaded;
+}
+
+/**
+ * Show warning message.
+ */
+function illuminate_warning(){
+    if(!drupal_is_cli()){
+      $message = t('Laravel components can not load, please install require components with Composer and Composer Manager.');
+      drupal_set_message($message, 'warning');
+    }
+}
+
+function illuminate_modules($base_module = 'laravel', $config_file = ''){
+  $key = "illuminatemodules:{$base_module}:{$config_file}";
+  $minutes = 60*24*365;
+
+  return Cache::remember($key, $minutes, function() use($base_module, $config_file){
+    $module_enabled = system_list('module_enabled');
+
+    return with(new \Drupal\ZM\Helper\ModulesFetcher($base_module, $config_file))
+            ->fetch($module_enabled);;
+  });
+}
+
+
+/**
+ * Get real path with token.
+ *
+ * @param  string $file File path. Use with [module-name] [theme-name] [theme]
+ *
+ * @return string Real path.
+ */
+function illuminate_realpath($file){
+  $theme_path = dirname($GLOBALS['theme_info']->filename);
+  $file = trim($file);
+  $file = str_replace('[theme]', $theme_path, $file);
+
+  $matches = array();
+  $types = array('module', 'theme', 'library');
+
+  foreach ($types as $type) {
+    $pattern = '/\{' . $type . '-(.+)\}/';
+
+    preg_match($pattern, $file, $matches);
+
+    if($type == "library"){
+      if (count($matches) > 1 && ($path = libraries_getpath($matches[1])) != '') {
+        $file = str_replace($matches[0], $path, $file);
+        return $file;
+      }
+    }else{
+      if (count($matches) > 1 && ($path = drupal_get_path($type, $matches[1])) != '') {
+        $file = str_replace($matches[0], $path, $file);
+        return $file;
+      }
+    }
+  }
+
+  return $file;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function illuminate_block_info() {
+  if(illuminate_load_instance()){
+    return with(new \Drupal\ZM\Hook\BlockInfo())->import();
+  }
+
+  return array();
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function illuminate_block_view($delta = '') {
+  return with(new \Drupal\ZM\Hook\BlockView($delta))->view();
+}

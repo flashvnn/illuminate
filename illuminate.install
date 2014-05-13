@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function illuminate_install() {
+  // Change block delta to 64 characters.
+  db_query("ALTER TABLE {block} CHANGE delta delta VARCHAR(64)");
+}

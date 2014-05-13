@@ -1,0 +1,6 @@
+name = Illuminate Example
+description = Example for Illuminate module.
+core = 7.x
+php = 5.3
+package = Illuminate
+dependencies[] = illuminate

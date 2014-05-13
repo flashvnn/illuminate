@@ -1,0 +1,27 @@
+blocks:
+
+  simple:
+    info: 'Simple Block'
+    subject: ''
+    content:
+      variables: {name: "HTK"}
+      engine: 'blade'
+      template_file: '{module-illuminate_example}/theme/mytheme.tpl.php'
+
+  hello_string:
+    info: 'Hello String'
+    subject: 'Hello String'
+    cache: DRUPAL_NO_CACHE
+    content:
+      engine: 'blade'
+      template_file: '{module-illuminate_example}/theme/mytheme.tpl.php'
+      attached:
+        css: ['{module-illuminate_example}/theme/mytheme.css']
+
+  hello_string_two:
+    info: 'Hello String TWO'
+    subject: 'Hello String'
+    cache: DRUPAL_CACHE_PER_ROLE
+    content:
+      engine: 'blade'
+      template_file: '{module-illuminate_example}/theme/mytheme.tpl.php'

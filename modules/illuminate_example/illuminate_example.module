@@ -1,0 +1,52 @@
+<?php
+/**
+ * @file
+ * Laravel Example.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function illuminate_example_menu() {
+
+  $items['illuminate-example'] = array(
+    'title' => 'Laravel Example',
+    'page callback' => 'illuminate_example_page',
+    'page arguments' => array() ,
+    'access arguments' => array(
+      'access content'
+    ) ,
+  );
+
+  $items['illuminate-example/%'] = array(
+    'title' => 'Laravel Example',
+    'page callback' => 'illuminate_example_detail_page',
+    'page arguments' => array(1) ,
+    'access arguments' => array(
+      'access content'
+    ) ,
+  );
+
+  return $items;
+}
+
+function illuminate_example_page(){
+  /*
+  $config = YAML::load('illuminate_example');
+  if($con_vars = $config->get('con.trai')){
+    dpm($con_vars);
+  }
+  */
+
+  /*
+  $data = Arrays::from(['foo' => 'bar']);
+  $data->name = "DEMO";
+  dpm($data->obtain());
+  */
+
+  return "OK";
+}
+
+function illuminate_example_detail_page($group) {
+  return "OK";
+}

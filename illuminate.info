@@ -1,0 +1,6 @@
+name = Illuminate
+description = Integration Laravel Illuminate component with Drupal.
+core = 7.x
+php = 5.3
+package = Illuminate
+dependencies[] = composer_manager
