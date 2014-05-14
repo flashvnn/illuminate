@@ -38,6 +38,10 @@ class DrupalConfigStore {
     $this->connection = $connection;
   }
 
+  private function getCacheKey($collection, $key){
+    return "drupalconfig::" . $collection . $key;
+  }
+
   /**
    * Retrieve an item from the collection by key.
    *
@@ -48,19 +52,28 @@ class DrupalConfigStore {
    */
   public function get($collection, $key)
   {
-    $cache = $this->table()->where('collection', '=', $collection)->where('key', '=', $key)->first();
-
-    if ( ! is_null($cache))
-    {
-      if (is_array($cache)) $cache = (object) $cache;
-
-      if (time() >= $cache->expiration)
+    $drupalconfig_data = &drupal_static($this->getCacheKey($collection, $key));
+    if(!isset($drupalconfig_data)){
+      $cache = $this->table()->where('collection', '=', $collection)->where('key', '=', $key)->first();
+      if ( ! is_null($cache))
       {
-        return $this->forget($collection, $key);
-      }
+        if (is_array($cache)) $cache = (object) $cache;
 
-      return json_decode($cache->value);
+        if (time() >= $cache->expiration)
+        {
+          $this->forget($collection, $key);
+          $drupalconfig_data = FALSE;
+        }
+        else {
+          $drupalconfig_data = json_decode($cache->value);
+        }
+      }
+      else {
+        $drupalconfig_data = FALSE;
+      }
     }
+
+    return $drupalconfig_data;
   }
 
   /**
@@ -102,6 +115,7 @@ class DrupalConfigStore {
     try
     {
       $this->table()->insert(compact('collection', 'key', 'value', 'expiration'));
+      drupal_static_reset($this->getCacheKey($collection, $key));
     }
     catch (\Exception $e)
     {
@@ -133,6 +147,8 @@ class DrupalConfigStore {
              ->where('collection', '=', $collection)
              ->where('key', '=', $key)
              ->delete();
+
+    drupal_static_reset($this->getCacheKey($collection, $key));
   }
 
   /**

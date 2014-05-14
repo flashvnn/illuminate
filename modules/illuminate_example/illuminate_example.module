@@ -31,7 +31,7 @@ function illuminate_example_menu() {
 }
 
 function illuminate_example_page(){
-  illuminate_example_drupalassets();
+  illuminate_example_drupalconfig();
 
   return "OK";
 }
@@ -70,6 +70,7 @@ function illuminate_example_drupalconfig(){
   $output[] = ("Put value for illuminate_example::key-2");
   DrupalConfig::put("illuminate_example", "key-2", "value-2");
 
+  $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
   $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
   $output[] = ("illuminate_example::key-2::" . DrupalConfig::get("illuminate_example", "key-2"));
 
