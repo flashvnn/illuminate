@@ -51,9 +51,8 @@ class YAMLPraser{
   * @api
   */
   public function save($module, $array, $config = 'config', $inline = 2, $indent = 4, $exceptionOnInvalidType = false, $objectSupport = false){
-    $file = new Filesystem();
-    if(!$file->isDirectory(drupal_get_path('module', $module) . "/config")){
-      $file->makeDirectory(drupal_get_path('module', $module) . "/config");
+    if(!File::isDirectory(drupal_get_path('module', $module) . "/config")){
+      File::makeDirectory(drupal_get_path('module', $module) . "/config");
     }
     $path = drupal_get_path('module', $module) . "/config/{$config}.yml";
     return $this->saveToFile($path, $array, $inline, $indent, $exceptionOnInvalidType, $objectSupport);
@@ -61,7 +60,6 @@ class YAMLPraser{
 
   public function saveToFile($path, $array, $inline = 2, $indent = 4, $exceptionOnInvalidType = false, $objectSupport = false){
     $string = \Symfony\Component\Yaml\Yaml::dump($array, $inline, $indent, $exceptionOnInvalidType, $objectSupport);
-
-    return file_put_contents($path, $string);
+    return File::put($path, $string);
   }
 }

@@ -1,9 +1,32 @@
 <?php
 
 /**
+ * Implements hook_schema().
+ */
+function illuminate_schema() {
+  $schema['zm_config'] = array(
+    'description' => 'Key-Value storage table with an expiration',
+    'fields' => array(
+      'collection' => array('type' => 'varchar', 'length' => 128, 'not null' => TRUE, 'default' => ''),
+      'key'       => array('type' => 'varchar', 'length' => 128, 'not null' => TRUE, 'default' => ''),
+      'value'      => array('type' => 'blob',                     'not null' => TRUE, 'size' => 'big'),
+      'expiration'     => array('type' => 'int',                      'not null' => TRUE, 'default' => 2147483647),
+    ),
+    'primary key' => array('collection', 'key'),
+    'indexes' => array(
+      'all' => array('key', 'collection', 'expiration'),
+      'expiration' => array('expiration'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
  * Implements hook_install().
  */
 function illuminate_install() {
   // Change block delta to 64 characters.
   db_query("ALTER TABLE {block} CHANGE delta delta VARCHAR(64)");
+
 }

@@ -97,10 +97,8 @@ class Application extends Container {
     $this->instance('app', $this);
 
     if(!empty($this['config']['app.aliases']['Response'])){
-      $this->singleton('request', function()
-      {
-          return \Illuminate\Http\Request::createFromGlobals();
-      });
+      $request = \Illuminate\Http\Request::createFromGlobals();
+      $this->singleton('request', $request);
     }
     // Consider using UrlGenerator.
     /*

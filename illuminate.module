@@ -35,7 +35,7 @@ function illuminate_load_instance(){
  */
 function illuminate_warning(){
     if(!drupal_is_cli()){
-      $message = t('Laravel components can not load, please install require components with Composer and Composer Manager.');
+      $message = t('Illuminate components can not load, please install require components with Composer and Composer Manager.');
       drupal_set_message($message, 'warning');
     }
 }
@@ -56,9 +56,11 @@ function illuminate_modules($base_module = 'laravel', $config_file = ''){
 /**
  * Get real path with token.
  *
- * @param  string $file File path. Use with [module-name] [theme-name] [theme]
+ * @param  string $file
+ *   File path. Use with {module-name} {theme-name} {theme}.
  *
- * @return string Real path.
+ * @return string
+ *   Real path.
  */
 function illuminate_realpath($file){
   $theme_path = dirname($GLOBALS['theme_info']->filename);
@@ -105,4 +107,29 @@ function illuminate_block_info() {
  */
 function illuminate_block_view($delta = '') {
   return with(new \Drupal\ZM\Hook\BlockView($delta))->view();
+}
+
+/**
+ * Implementation of hook_entity_view_alter().
+ */
+function illuminate_entity_view_alter(&$build, $type) {
+/*  if($build['#view_mode'] != 'full' && $build['#view_mode'] != 'default') return;
+
+  $mybuild = app('contentrender')->render(
+    array(
+      'template_file' => '{module-illuminate_example}/theme/mytheme.tpl.php',
+      'variables' => array('build' => $build),
+    )
+  );
+
+  $build = array(
+    '#entity_type'       => $build['#entity_type'],
+    '#bundle'            => $build['#bundle'],
+    '#view_mode'         => $build['#view_mode'],
+    '#language'          => $build['#language'],
+    //'#contextual_links ' => !empty($this->build['#contextual_links']) ? $this->build['#contextual_links'] : NULL,
+    'illuminateview'            => is_string($mybuild) ? array('#markup' => $mybuild) : $mybuild,
+    '#build'             => $build,
+  );*/
+
 }

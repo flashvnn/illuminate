@@ -31,22 +31,55 @@ function illuminate_example_menu() {
 }
 
 function illuminate_example_page(){
-  /*
-  $config = YAML::load('illuminate_example');
-  if($con_vars = $config->get('con.trai')){
-    dpm($con_vars);
-  }
-  */
-
-  /*
-  $data = Arrays::from(['foo' => 'bar']);
-  $data->name = "DEMO";
-  dpm($data->obtain());
-  */
+  illuminate_example_drupalconfig();
 
   return "OK";
 }
 
 function illuminate_example_detail_page($group) {
   return "OK";
+}
+
+function illuminate_example_cache(){
+
+  $cachedata = Cache::remember('illuminate_example_cache', 1, function(){
+      return "Now is:" . date("Y-m-d h:i:s");
+  });
+
+  dpm($cachedata);
+}
+
+function illuminate_example_yamlconfig(){
+  $config = YAML::load('illuminate_example');
+
+  if($con_vars = $config->get('name')){
+    dpm($con_vars);
+  }
+
+}
+
+function illuminate_example_drupalconfig(){
+  $output = array();
+  $output[] = "Put value for illuminate_example::key-1";
+  DrupalConfig::put("illuminate_example", "key-1", "value-1");
+
+  $output[] = ("Put value for illuminate_example::key-2");
+  DrupalConfig::put("illuminate_example", "key-2", "value-2");
+
+  $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
+  $output[] = ("illuminate_example::key-2::" . DrupalConfig::get("illuminate_example", "key-2"));
+
+  $output[] = ("Remove illuminate_example::key-1");
+  DrupalConfig::forget("illuminate_example", "key-1");
+  $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
+  $output[] = ("All illuminate_example keys");
+  $output[] = (DrupalConfig::all("illuminate_example"));
+
+  $output[] = ("Remove all illuminate_example keys");
+  DrupalConfig::flush("illuminate_example");
+  $output[] = ("Check illuminate_example keys::");
+
+  $output[] = (DrupalConfig::all("illuminate_example"));
+
+  dpm($output);
 }

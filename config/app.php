@@ -30,6 +30,7 @@ return array(
     'Illuminate\Encryption\EncryptionServiceProvider',
     'Illuminate\Translation\TranslationServiceProvider',//used with Request, Cookie alias.
     'Illuminate\Validation\ValidationServiceProvider',//used with Validator alias.
+    'Drupal\Laravel\Config\DrupalConfigServiceProvider',
     'Drupal\Laravel\ContentRender\ContentRenderServiceProvider',//used with View alias.
     'Drupal\Laravel\YAML\YAMLServiceProvider',//used with View alias.
     'Drupal\Laravel\ViewServiceProvider',//used with View alias.
@@ -43,34 +44,23 @@ return array(
      'Parse'       => 'Underscore\Parse',
      'Carbon'      => 'Carbon\Carbon',
      'Str'         => 'Illuminate\Support\Str',
-
      'ClassLoader' => 'Illuminate\Support\ClassLoader',
 
-     // Facades classes.
-     //
-     // Container (require)
      'App'         => 'Illuminate\Support\Facades\App',
      'Event'       => 'Illuminate\Support\Facades\Event',
-     // Cache
      'Cache'       => 'Illuminate\Support\Facades\Cache',
      'Config'      => 'Illuminate\Support\Facades\Config',
-     // File (require)
+     'DrupalConfig'=> 'Drupal\Laravel\Config\Facades\DrupalConfig',
      'File'        => 'Illuminate\Support\Facades\File',
-
-     // DB (option)
      'DB'          => 'Illuminate\Support\Facades\DB',
      'Eloquent'    => 'Illuminate\Database\Eloquent\Model',
      'Schema'      => 'Illuminate\Support\Facades\Schema',
-     // Request (option)
      'Request'     => 'Illuminate\Support\Facades\Request',
      'Cookie'      => 'Illuminate\Support\Facades\Cookie',
      'Crypt'       => 'Illuminate\Support\Facades\Crypt',
      'Input'       => 'Illuminate\Support\Facades\Input',
-     'Response'    => 'Illuminate\Support\Facades\Response',
-
-     // Validator (option)
+     /*'Response'    => 'Illuminate\Support\Facades\Response',*/
      'Validator'   => 'Illuminate\Support\Facades\Validator',
-     //View (option)
      'ViewRender'  => 'Illuminate\Support\Facades\View',
      'YAML'        => 'Drupal\Laravel\YAML\Facades\YAML',
   ),

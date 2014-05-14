@@ -1,1 +1,4 @@
-<h1>DEMO TEAMPLTE <?php print $name ?></h1>
+<?php
+  //print render($build);
+?>
+<h1>DEMO TEAMPLTE</h1>
