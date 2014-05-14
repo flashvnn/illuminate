@@ -31,6 +31,7 @@ return array(
     'Illuminate\Translation\TranslationServiceProvider',//used with Request, Cookie alias.
     'Illuminate\Validation\ValidationServiceProvider',//used with Validator alias.
     'Drupal\Laravel\Config\DrupalConfigServiceProvider',
+    'Drupal\Laravel\Assets\DrupalAssetsServiceProvider',
     'Drupal\Laravel\ContentRender\ContentRenderServiceProvider',//used with View alias.
     'Drupal\Laravel\YAML\YAMLServiceProvider',//used with View alias.
     'Drupal\Laravel\ViewServiceProvider',//used with View alias.
@@ -51,6 +52,7 @@ return array(
      'Cache'       => 'Illuminate\Support\Facades\Cache',
      'Config'      => 'Illuminate\Support\Facades\Config',
      'DrupalConfig'=> 'Drupal\Laravel\Config\Facades\DrupalConfig',
+     'DrupalAssets'=> 'Drupal\Laravel\Assets\Facades\DrupalAssets',
      'File'        => 'Illuminate\Support\Facades\File',
      'DB'          => 'Illuminate\Support\Facades\DB',
      'Eloquent'    => 'Illuminate\Database\Eloquent\Model',
