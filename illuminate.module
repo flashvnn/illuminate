@@ -63,10 +63,12 @@ function illuminate_modules($base_module = 'laravel', $config_file = ''){
  *   Real path.
  */
 function illuminate_realpath($file){
-  $theme_default = $GLOBALS['conf']['theme_default'];
-  $theme_path = drupal_get_path('theme', $theme_default);
   $file = trim($file);
-  $file = str_replace('{theme}', $theme_path, $file);
+  if (strpos($file, '{theme}') !== FALSE) {
+    $theme_default = $GLOBALS['conf']['theme_default'];
+    $theme_path = drupal_get_path('theme', $theme_default);
+    $file = str_replace('{theme}', $theme_path, $file);
+  }
 
   $matches = array();
   $types = array('module', 'theme', 'library');
@@ -77,7 +79,7 @@ function illuminate_realpath($file){
     preg_match($pattern, $file, $matches);
 
     if($type == "library"){
-      if (count($matches) > 1 && ($path = libraries_getpath($matches[1])) != '') {
+      if (count($matches) > 1 && ($path = libraries_get_path($matches[1])) != '') {
         $file = str_replace($matches[0], $path, $file);
         return $file;
       }
