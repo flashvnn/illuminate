@@ -45,9 +45,9 @@ class ContentRender {
     if (!is_file($template_file)) {
       return "";
     }
-
-    if ($options['engine'] == 'blade' && function_exists('blade_render_template')) {
-      return blade_render_template($template_file, $variables);
+    $engines = app('view')->getExtensions();
+    if (in_array($options['engine'], array_values($engines))) {
+      return app('view')->make($template_file, $variables);
     } else {
       return theme_render_template($template_file, $variables);
     }
@@ -76,8 +76,8 @@ class ContentRender {
 
       return $this->renderTemplate($tpl, $this->getVariables() , $options);
     }
-    if (isset($this->data['template'])) {
 
+    if (isset($this->data['template'])) {
       return $this->data['template'];
     }
 
@@ -91,7 +91,7 @@ class ContentRender {
     }
 
     $return = $this->processTemplate();
-    // Attach assets
+    // Attach assets.
     if (is_array($this->data) && !empty($this->data['attached'])) {
       $return = is_array($return) ? $return : array(
         '#markup' => $return

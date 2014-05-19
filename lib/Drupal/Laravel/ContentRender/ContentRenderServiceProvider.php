@@ -10,9 +10,8 @@ class ContentRenderServiceProvider extends ServiceProvider {
   */
   public function register()
   {
-    $this->app['contentrender'] = $this->app->share(function($app)
-    {
-      return new ContentRender();
+    $this->app->bindShared('contentrender', function($app) {
+        return new ContentRender();
     });
   }
 

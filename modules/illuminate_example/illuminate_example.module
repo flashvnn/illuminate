@@ -103,7 +103,7 @@ function illuminate_example_preprocess_page(&$variables) {
  * @return string
  */
 function illuminate_example_viewrender() {
-  $template = DRUPAL_ROOT . "/sites/all/views/demo.tpl.php";
-
-  return ViewRender::make($template)->render();
+  $template = DRUPAL_ROOT . "/sites/all/blade/demo.tpl.php";
+  //$template = 'demo';
+  return ViewRender::make($template, array("name" => "HKT"))->render();
 }
