@@ -23,18 +23,18 @@ return array(
   */
   'providers' => array(
     'Illuminate\Events\EventServiceProvider',
-    'Drupal\Laravel\Cache\CacheServiceProvider', //used with Cache alias.
-    'Drupal\Laravel\CookieExtraServiceProvider',
-    'Illuminate\Filesystem\FilesystemServiceProvider', //used with File alias.
-    'Illuminate\Database\DatabaseServiceProvider',// used with DB alias
+    'Illuminate\Filesystem\FilesystemServiceProvider',
+    'Illuminate\Database\DatabaseServiceProvider',
     'Illuminate\Encryption\EncryptionServiceProvider',
-    'Illuminate\Translation\TranslationServiceProvider',//used with Request, Cookie alias.
-    'Illuminate\Validation\ValidationServiceProvider',//used with Validator alias.
+    'Illuminate\Translation\TranslationServiceProvider',
+    'Illuminate\Validation\ValidationServiceProvider',
+    'Drupal\Laravel\Cache\CacheServiceProvider',
+    'Drupal\Laravel\Cookie\CookieServiceProvider',
     'Drupal\Laravel\Config\DrupalConfigServiceProvider',
     'Drupal\Laravel\Assets\DrupalAssetsServiceProvider',
-    'Drupal\Laravel\ContentRender\ContentRenderServiceProvider',//used with View alias.
-    'Drupal\Laravel\YAML\YAMLServiceProvider',//used with View alias.
-    'Drupal\Laravel\ViewServiceProvider',//used with View alias.
+    'Drupal\Laravel\ContentRender\ContentRenderServiceProvider',
+    'Drupal\Laravel\YAML\YAMLServiceProvider',
+    'Drupal\Laravel\View\ViewServiceProvider',
   ),
   'aliases' => array(
      // Helper classes (option)

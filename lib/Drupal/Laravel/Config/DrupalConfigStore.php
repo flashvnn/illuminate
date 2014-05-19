@@ -109,13 +109,15 @@ class DrupalConfigStore {
    */
   public function put($collection, $key, $value, $minutes = 5256000)
   {
+    $old_val = $value;
     $value = json_encode($value);
     $expiration = $this->getTime() + ($minutes * 60);
 
     try
     {
       $this->table()->insert(compact('collection', 'key', 'value', 'expiration'));
-      drupal_static_reset($this->getCacheKey($collection, $key));
+      $drupalconfig_data = &drupal_static($this->getCacheKey($collection, $key));
+      $drupalconfig_data = $old_val;
     }
     catch (\Exception $e)
     {

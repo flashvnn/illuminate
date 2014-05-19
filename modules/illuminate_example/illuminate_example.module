@@ -31,9 +31,7 @@ function illuminate_example_menu() {
 }
 
 function illuminate_example_page(){
-  illuminate_example_drupalconfig();
-
-  return "OK";
+  return illuminate_example_viewrender();
 }
 
 function illuminate_example_detail_page($group) {
@@ -71,7 +69,6 @@ function illuminate_example_drupalconfig(){
   DrupalConfig::put("illuminate_example", "key-2", "value-2");
 
   $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
-  $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
   $output[] = ("illuminate_example::key-2::" . DrupalConfig::get("illuminate_example", "key-2"));
 
   $output[] = ("Remove illuminate_example::key-1");
@@ -87,4 +84,26 @@ function illuminate_example_drupalconfig(){
   $output[] = (DrupalConfig::all("illuminate_example"));
 
   dpm($output);
+}
+
+/**
+ * Implementation of hook_preprocess_page().
+ */
+function illuminate_example_preprocess_page(&$variables) {
+
+  if(App::offsetExists('mydemodata')){
+    dpm(App::offsetGet('mydemodata'));
+  }
+
+}
+
+/**
+ * Example view render.
+ *
+ * @return string
+ */
+function illuminate_example_viewrender() {
+  $template = DRUPAL_ROOT . "/sites/all/views/demo.tpl.php";
+
+  return ViewRender::make($template)->render();
 }
