@@ -31,33 +31,58 @@ function illuminate_example_menu() {
 }
 
 function illuminate_example_page(){
-  return illuminate_example_viewrender();
+  $examples = array(
+    'cache'        => "Cache Example",
+    'yamlconfig'   => "YAML Config Example",
+    'drupalassets' => "Drupal Assets Example",
+    'drupalconfig' => "Drupal Config Example",
+    'viewrender'   => "Laravel View Render Example",
+    'sendemail'    => "Send Email example",
+  );
+  $items = array();
+  foreach ($examples as $key => $value) {
+    $items[] = l($value, "illuminate-example/" . $key);
+  }
+
+  $output = theme("item_list", array("items" => $items));
+
+  return $output;
 }
 
 function illuminate_example_detail_page($group) {
-  return "OK";
+  $fn = 'illuminate_example_'.$group;
+  if (function_exists($fn)){
+    return $fn();
+  }
+
+  return $fn . ":: Not found.";
 }
 
 function illuminate_example_cache(){
 
-  $cachedata = Cache::remember('illuminate_example_cache', 1, function(){
+  $cachedata = Cache::remember('illuminate_example_cache', 1/6, function(){
       return "Now is:" . date("Y-m-d h:i:s");
   });
 
-  dpm($cachedata);
+  return "Cache data in 10 seconds::" . $cachedata;
 }
 
 function illuminate_example_yamlconfig(){
   $config = YAML::load('illuminate_example');
-
+  // Get all config variables.
+  dpm($config->obtain());
+  // Get config with a key.
   if($con_vars = $config->get('name')){
     dpm($con_vars);
   }
 
+  return "Loaded yaml config";
 }
 
 function illuminate_example_drupalassets(){
   DrupalAssets::addCSS("{module-illuminate_example}/theme/mytheme.css");
+
+  return "DrupalAssets test, load css change style of " . check_plain('<h1>');
 }
 
 function illuminate_example_drupalconfig(){
@@ -83,18 +108,7 @@ function illuminate_example_drupalconfig(){
 
   $output[] = (DrupalConfig::all("illuminate_example"));
 
-  dpm($output);
-}
-
-/**
- * Implementation of hook_preprocess_page().
- */
-function illuminate_example_preprocess_page(&$variables) {
-
-  if(App::offsetExists('mydemodata')){
-    dpm(App::offsetGet('mydemodata'));
-  }
-
+  return implode("<br />", $output);
 }
 
 /**
@@ -103,7 +117,18 @@ function illuminate_example_preprocess_page(&$variables) {
  * @return string
  */
 function illuminate_example_viewrender() {
-  $template = DRUPAL_ROOT . "/sites/all/blade/demo.tpl.php";
-  //$template = 'demo';
+  $template = illuminate_realpath('{module-illuminate_example}/theme/mytheme.tpl.php');
+
   return ViewRender::make($template, array("name" => "HKT"))->render();
+}
+
+
+function illuminate_example_sendemail() {
+  $data = array('firstname' => 'HKT');
+  $template = illuminate_realpath('{module-illuminate_example}/theme/welcome.tpl.php');
+  Mail::send($template, $data, function($message) {
+      $message->to('flashvnn@gmail.com', 'Flash Vnn')->subject('Welcome Laravel!');
+  });
+
+  return "Send mail complete";
 }

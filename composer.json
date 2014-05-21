@@ -14,6 +14,8 @@
     "illuminate/translation": "4.1.*@dev",
     "illuminate/validation": "4.1.*@dev",
     "illuminate/view": "4.1.*@dev",
+    "illuminate/mail": "4.1.*@dev",
+    "illuminate/queue": "4.1.*@dev",
     "anahkiasen/underscore-php" : "dev-master",
     "symfony/yaml": "2.5.*@dev"
 	},

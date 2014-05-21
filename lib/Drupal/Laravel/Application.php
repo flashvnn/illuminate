@@ -95,7 +95,7 @@ class Application extends Container {
 
   private function registerBaseBindings(){
     $this->instance('app', $this);
-
+    $this['env'] = 'production';
     if(!empty($this['config']['app.aliases']['Response'])){
       $request = \Illuminate\Http\Request::createFromGlobals();
       $this->singleton('request', $request);
