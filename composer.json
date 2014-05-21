@@ -9,6 +9,7 @@
   ],
 	"require": {
     "illuminate/config": "4.1.*@dev",
+    "illuminate/exception": "4.1.*@dev",
     "illuminate/http": "4.1.*@dev",
     "illuminate/database": "4.1.*@dev",
     "illuminate/translation": "4.1.*@dev",

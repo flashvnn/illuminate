@@ -1,4 +1,5 @@
 <?php namespace Drupal\Laravel\Cookie;
+
 use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Cookie\CookieJar;
 

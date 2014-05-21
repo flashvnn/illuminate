@@ -2,9 +2,33 @@
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Container\Container;
+use Illuminate\Exception\ExceptionServiceProvider;
+use Illuminate\Events\EventServiceProvider;
 use Illuminate\Config\Repository as Config;
 
 class Application extends Container {
+
+  /**
+   * Indicates if the application has "booted".
+   *
+   * @var bool
+   */
+  protected $booted = false;
+
+  /**
+   * The array of booting callbacks.
+   *
+   * @var array
+   */
+  protected $bootingCallbacks = array();
+
+  /**
+   * The array of booted callbacks.
+   *
+   * @var array
+   */
+  protected $bootedCallbacks = array();
+
   /**
    * All of the registered service providers.
    *
@@ -32,6 +56,7 @@ class Application extends Container {
     $this['path'] = $path;
     $this->registerConfig();
     $this->registerBaseBindings();
+    $this->registerBaseServiceProviders();
     $this->registerProviders();
     $this->registerFacedeApplication();
     $this->registerAliases();
@@ -89,6 +114,60 @@ class Application extends Container {
     return $provider;
   }
 
+  /**
+   * Determine if the application has booted.
+   *
+   * @return bool
+   */
+  public function isBooted()
+  {
+    return $this->booted;
+  }
+
+  /**
+   * Boot the application's service providers.
+   *
+   * @return void
+   */
+  public function boot()
+  {
+    if ($this->booted) return;
+
+    array_walk($this->serviceProviders, function($p) { $p->boot(); });
+
+    $this->bootApplication();
+  }
+
+  /**
+   * Boot the application and fire app callbacks.
+   *
+   * @return void
+   */
+  protected function bootApplication()
+  {
+    // Once the application has booted we will also fire some "booted" callbacks
+    // for any listeners that need to do work after this initial booting gets
+    // finished. This is useful when ordering the boot-up processes we run.
+    $this->fireAppCallbacks($this->bootingCallbacks);
+
+    $this->booted = true;
+
+    $this->fireAppCallbacks($this->bootedCallbacks);
+  }
+
+  /**
+   * Call the booting callbacks for the application.
+   *
+   * @return void
+   */
+  protected function fireAppCallbacks(array $callbacks)
+  {
+    foreach ($callbacks as $callback)
+    {
+      call_user_func($callback, $this);
+    }
+  }
+
   private function getConfigLoader(){
     return new \Illuminate\Config\FileLoader(new \Illuminate\Filesystem\Filesystem, $this['path'].'/config');
   }
@@ -98,14 +177,59 @@ class Application extends Container {
     $this['env'] = 'production';
     if(!empty($this['config']['app.aliases']['Response'])){
       $request = \Illuminate\Http\Request::createFromGlobals();
-      $this->singleton('request', $request);
+      $this->instance('request', $request);
     }
+    $this->instance('Illuminate\Container\Container', $this);
     // Consider using UrlGenerator.
     /*
     $this->app->bindShared('url', function ($app)
     {
       return new \Illuminate\Routing\UrlGenerator();
     });*/
+  }
+
+  /**
+   * Register all of the base service providers.
+   *
+   * @return void
+   */
+  protected function registerBaseServiceProviders()
+  {
+    foreach (array('Event', 'Exception') as $name)
+    {
+      $this->{"register{$name}Provider"}();
+    }
+  }
+
+  /**
+   * Register the event service provider.
+   *
+   * @return void
+   */
+  protected function registerEventProvider()
+  {
+    $this->register(new EventServiceProvider($this));
+  }
+
+
+  /**
+   * Determine if we are running in the console.
+   *
+   * @return bool
+   */
+  public function runningInConsole()
+  {
+    return php_sapi_name() == 'cli';
+  }
+
+  /**
+   * Register the exception service provider.
+   *
+   * @return void
+   */
+  protected function registerExceptionProvider()
+  {
+    $this->register(new ExceptionServiceProvider($this));
   }
 
   private function registerConfig($config = array()){

@@ -1,5 +1,5 @@
 <?php namespace Drupal\Laravel\Cookie;
-use Drupal\Laravel\CookieExtra;
+
 use Illuminate\Support\ServiceProvider;
 
 class CookieServiceProvider extends ServiceProvider

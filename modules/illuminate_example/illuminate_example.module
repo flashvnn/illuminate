@@ -10,21 +10,17 @@
 function illuminate_example_menu() {
 
   $items['illuminate-example'] = array(
-    'title' => 'Laravel Example',
-    'page callback' => 'illuminate_example_page',
-    'page arguments' => array() ,
-    'access arguments' => array(
-      'access content'
-    ) ,
+    'title'            => 'Laravel Example',
+    'page callback'    => 'illuminate_example_page',
+    'page arguments'   => array() ,
+    'access arguments' => array('access content'),
   );
 
   $items['illuminate-example/%'] = array(
-    'title' => 'Laravel Example',
-    'page callback' => 'illuminate_example_detail_page',
-    'page arguments' => array(1) ,
-    'access arguments' => array(
-      'access content'
-    ) ,
+    'title'            => 'Laravel Example',
+    'page callback'    => 'illuminate_example_detail_page',
+    'page arguments'   => array(1) ,
+    'access arguments' => array('access content') ,
   );
 
   return $items;
@@ -38,7 +34,9 @@ function illuminate_example_page(){
     'drupalconfig' => "Drupal Config Example",
     'viewrender'   => "Laravel View Render Example",
     'sendemail'    => "Send Email example",
+    'response'     => "Response example",
   );
+
   $items = array();
   foreach ($examples as $key => $value) {
     $items[] = l($value, "illuminate-example/" . $key);
@@ -68,19 +66,21 @@ function illuminate_example_cache(){
 }
 
 function illuminate_example_yamlconfig(){
+
+
   $config = YAML::load('illuminate_example');
   // Get all config variables.
-  dpm($config->obtain());
+  dpm($config->obtain(), "All variables: YAML::load('illuminate_example')->obtain():");
   // Get config with a key.
   if($con_vars = $config->get('name')){
-    dpm($con_vars);
+    dpm($con_vars, "Get name var YAML::load('illuminate_example')->get('name'):");
   }
 
-  return "Loaded yaml config";
+  return "Loaded yaml config:" . illuminate_realpath('{module-illuminate_example}/config/config.yml');
 }
 
 function illuminate_example_drupalassets(){
-  DrupalAssets::addCSS("{module-illuminate_example}/theme/mytheme.css");
+  DrupalAssets::addCSS(array("{module-illuminate_example}/theme/mytheme.css"));
 
   return "DrupalAssets test, load css change style of " . check_plain('<h1>');
 }
@@ -107,8 +107,9 @@ function illuminate_example_drupalconfig(){
   $output[] = ("Check illuminate_example keys::");
 
   $output[] = (DrupalConfig::all("illuminate_example"));
+  dpm($output);
 
-  return implode("<br />", $output);
+  return "Drupal config";
 }
 
 /**
@@ -131,4 +132,10 @@ function illuminate_example_sendemail() {
   });
 
   return "Send mail complete";
+}
+
+
+function illuminate_example_response() {
+
+  return Response::json(array('name' => 'Steve', 'state' => 'CA'))->setCallback(Input::get('callback'));
 }
