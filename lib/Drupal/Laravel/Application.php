@@ -1,12 +1,15 @@
 <?php namespace Drupal\Laravel;
 
-use Illuminate\Support\Facades\Facade;
+use Closure;
 use Illuminate\Container\Container;
-use Illuminate\Exception\ExceptionServiceProvider;
+use Illuminate\Support\Facades\Facade;
+use Drupal\Laravel\Exception\ExceptionServiceProvider;
 use Illuminate\Events\EventServiceProvider;
+use Illuminate\Routing\RoutingServiceProvider;
 use Illuminate\Config\Repository as Config;
+use Illuminate\Support\Contracts\ResponsePreparerInterface;
 
-class Application extends Container {
+class Application extends Container implements ResponsePreparerInterface {
 
   /**
    * Indicates if the application has "booted".
@@ -180,12 +183,6 @@ class Application extends Container {
       $this->instance('request', $request);
     }
     $this->instance('Illuminate\Container\Container', $this);
-    // Consider using UrlGenerator.
-    /*
-    $this->app->bindShared('url', function ($app)
-    {
-      return new \Illuminate\Routing\UrlGenerator();
-    });*/
   }
 
   /**
@@ -195,7 +192,7 @@ class Application extends Container {
    */
   protected function registerBaseServiceProviders()
   {
-    foreach (array('Event', 'Exception') as $name)
+    foreach (array('Event', 'Exception', 'Routing') as $name)
     {
       $this->{"register{$name}Provider"}();
     }
@@ -211,6 +208,15 @@ class Application extends Container {
     $this->register(new EventServiceProvider($this));
   }
 
+  /**
+   * Register the routing service provider.
+   *
+   * @return void
+   */
+  protected function registerRoutingProvider()
+  {
+    $this->register(new RoutingServiceProvider($this));
+  }
 
   /**
    * Determine if we are running in the console.
@@ -414,4 +420,106 @@ class Application extends Container {
     return parent::make($abstract, $parameters);
   }
 
+  /**
+   * Start the exception handling for the request.
+   *
+   * @return void
+   */
+  public function startExceptionHandling()
+  {
+    $this['exception']->register($this->environment());
+
+    $this['exception']->setDebug($this['config']['app.debug']);
+  }
+
+  /**
+   * Get or check the current application environment.
+   *
+   * @param  dynamic
+   * @return string
+   */
+  public function environment()
+  {
+    if (count(func_get_args()) > 0)
+    {
+      return in_array($this['env'], func_get_args());
+    }
+    else
+    {
+      return $this['env'];
+    }
+  }
+
+  /**
+   * Register an application error handler.
+   *
+   * @param  Closure  $callback
+   * @return void
+   */
+  public function error(Closure $callback)
+  {
+    $this['exception']->error($callback);
+  }
+
+  /**
+   * Register an error handler at the bottom of the stack.
+   *
+   * @param  Closure  $callback
+   * @return void
+   */
+  public function pushError(Closure $callback)
+  {
+    $this['exception']->pushError($callback);
+  }
+
+  /**
+   * Register an error handler for fatal errors.
+   *
+   * @param  Closure  $callback
+   * @return void
+   */
+  public function fatal(Closure $callback)
+  {
+    $this->error(function(FatalErrorException $e) use ($callback)
+    {
+      return call_user_func($callback, $e);
+    });
+  }
+
+  /**
+   * Register a 404 error handler.
+   *
+   * @param  Closure  $callback
+   * @return void
+   */
+  public function missing(Closure $callback)
+  {
+    $this->error(function(NotFoundHttpException $e) use ($callback)
+    {
+      return call_user_func($callback, $e);
+    });
+  }
+
+  /**
+   * Prepare the given value as a Response object.
+   *
+   * @param  mixed  $value
+   * @return \Symfony\Component\HttpFoundation\Response
+   */
+  public function prepareResponse($value)
+  {
+    if ( ! $value instanceof SymfonyResponse) $value = new Response($value);
+
+    return $value->prepare($this['request']);
+  }
+
+  /**
+   * Determine if the application is ready for responses.
+   *
+   * @return bool
+   */
+  public function readyForResponses()
+  {
+    return $this->booted;
+  }
 }

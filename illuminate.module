@@ -18,6 +18,13 @@ function illuminate_page_delivery_callback_alter(&$callback) {
     $callback = 'illuminate_deliver_html_page';
   }
 }
+
+function illuminate_addPSR0($prefix, $paths, $prepend = false) {
+  if (illuminate_load_instance()) {
+   $loader = ComposerAutoloaderInitComposerManager::getLoader();
+   $loader->add($prefix, $paths, $prepend);
+ }
+}
 /**
  * Load laravel application instance.
  */
@@ -28,6 +35,7 @@ function illuminate_load_instance(){
     if(class_exists('\\Drupal\\Laravel\\Application')){
       $app = new \Drupal\Laravel\Application(__DIR__);
       $app['path.storage'] = variable_get('file_public_path', conf_path() . '/files');
+      $app->startExceptionHandling();
       $app->boot();
       $loaded = TRUE;
     }else{
@@ -208,14 +216,21 @@ function illuminate_deliver_html_page($page_callback_result) {
     }
   }
   elseif (isset($page_callback_result)) {
-    if (class_exists('Symfony\Component\HttpFoundation\Response') && $page_callback_result instanceof Symfony\Component\HttpFoundation\Response) {
+    if ($page_callback_result instanceof Symfony\Component\HttpFoundation\Response) {
       $page_callback_result->send();
     }
     else {
+      if ($page_callback_result instanceof Illuminate\View\View) {
+        $page_callback_result = $page_callback_result->render();
+      }
       print drupal_render_page($page_callback_result);
     }
   }
 
   // Perform end-of-request tasks.
   drupal_page_footer();
+}
+
+function illuminate_controller($controller, $action, $params = NULL) {
+  return App::make($controller)->{$action}($params);
 }

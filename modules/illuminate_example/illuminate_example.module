@@ -5,6 +5,13 @@
  */
 
 /**
+ * Implements hook_init().
+ */
+function illuminate_example_init() {
+  illuminate_addPSR0("Drupal\\illuminate_example\\Example", drupal_get_path("module", "illuminate_example") . "/lib");
+}
+
+/**
  * Implements hook_menu().
  */
 function illuminate_example_menu() {
@@ -23,20 +30,31 @@ function illuminate_example_menu() {
     'access arguments' => array('access content') ,
   );
 
+  $items['illuminate-controller'] = array(
+    'title'            => 'Laravel Controller',
+    'page callback'    => 'illuminate_controller',
+    'page arguments'   => array("\\Drupal\\illuminate_example\\Example\\DemoController", "showProfile") ,
+    'access arguments' => array('access content'),
+  );
+
   return $items;
 }
 
-function illuminate_example_page(){
-  $examples = array(
+function illuminate_example_items() {
+  return array(
     'cache'        => "Cache Example",
     'yamlconfig'   => "YAML Config Example",
     'drupalassets' => "Drupal Assets Example",
     'drupalconfig' => "Drupal Config Example",
-    'viewrender'   => "Laravel View Render Example",
     'sendemail'    => "Send Email example",
     'response'     => "Response example",
+    'log'          => "Log example",
+    'viewrender'   => "Laravel View Render Example",
   );
+}
 
+function illuminate_example_page(){
+  $examples = illuminate_example_items();
   $items = array();
   foreach ($examples as $key => $value) {
     $items[] = l($value, "illuminate-example/" . $key);
@@ -47,9 +65,12 @@ function illuminate_example_page(){
   return $output;
 }
 
-function illuminate_example_detail_page($group) {
-  $fn = 'illuminate_example_'.$group;
+function illuminate_example_detail_page($key) {
+  $fn = 'illuminate_example_'.$key;
   if (function_exists($fn)){
+    $examples = illuminate_example_items();
+    drupal_set_title($examples[$key]);
+
     return $fn();
   }
 
@@ -80,7 +101,9 @@ function illuminate_example_yamlconfig(){
 }
 
 function illuminate_example_drupalassets(){
-  DrupalAssets::addCSS(array("{module-illuminate_example}/theme/mytheme.css"));
+  //DrupalAssets::css("{module-illuminate_example}/theme/mytheme.css");
+
+  DrupalAssets::module("illuminate_example")->css("theme/mytheme.css");
 
   return "DrupalAssets test, load css change style of " . check_plain('<h1>');
 }
@@ -120,13 +143,14 @@ function illuminate_example_drupalconfig(){
 function illuminate_example_viewrender() {
   $template = illuminate_realpath('{module-illuminate_example}/theme/mytheme.tpl.php');
 
-  return ViewRender::make($template, array("name" => "HKT"))->render();
+  return ViewRender::make($template, array("name" => "HKT"));
 }
 
 
 function illuminate_example_sendemail() {
   $data = array('firstname' => 'HKT');
   $template = illuminate_realpath('{module-illuminate_example}/theme/welcome.tpl.php');
+
   Mail::send($template, $data, function($message) {
       $message->to('flashvnn@gmail.com', 'Flash Vnn')->subject('Welcome Laravel!');
   });
@@ -137,5 +161,15 @@ function illuminate_example_sendemail() {
 
 function illuminate_example_response() {
 
-  return Response::json(array('name' => 'Steve', 'state' => 'CA'))->setCallback(Input::get('callback'));
+  return Response::json(user_load(1));
+}
+
+function illuminate_example_log() {
+  $logfile = "public://laravel.log";
+  Log::useFiles($logfile);
+
+  Log::info('This is some useful information.');
+
+
+  return nl2br(File::get($logfile));
 }

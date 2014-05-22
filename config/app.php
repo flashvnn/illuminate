@@ -8,9 +8,10 @@
 
 
 return array(
-  'locale' => 'en',
+  'debug'           => TRUE,
+  'locale'          => 'en',
   'fallback_locale' => 'en',
-  'key' => 'rIJdQkSmzQwYHlOJ7PlOYeB0oCjX6i3q',
+  'key'             => 'rIJdQkSmzQwYHlOJ7PlOYeB0oCjX6i3q',
   /*
   |--------------------------------------------------------------------------
   | Autoloaded Service Providers
@@ -52,6 +53,7 @@ return array(
      'Event'        => 'Illuminate\Support\Facades\Event',
      'Cache'        => 'Illuminate\Support\Facades\Cache',
      'Config'       => 'Illuminate\Support\Facades\Config',
+     'Controller'   => 'Illuminate\Routing\Controller',
      'DrupalConfig' => 'Drupal\Laravel\Config\Facades\DrupalConfig',
      'DrupalAssets' => 'Drupal\Laravel\Assets\Facades\DrupalAssets',
      'File'         => 'Illuminate\Support\Facades\File',
@@ -61,11 +63,13 @@ return array(
      'Mail'         => 'Illuminate\Support\Facades\Mail',
      'Request'      => 'Illuminate\Support\Facades\Request',
      'Response'     => 'Illuminate\Support\Facades\Response',
+     'Route'        => 'Illuminate\Support\Facades\Route',
      'Schema'       => 'Illuminate\Support\Facades\Schema',
      'Cookie'       => 'Illuminate\Support\Facades\Cookie',
      'Crypt'        => 'Illuminate\Support\Facades\Crypt',
      'Input'        => 'Illuminate\Support\Facades\Input',
      'Queue'        => 'Illuminate\Support\Facades\Queue',
+     'URL'          => 'Illuminate\Support\Facades\URL',
      'Validator'    => 'Illuminate\Support\Facades\Validator',
      'ViewRender'   => 'Illuminate\Support\Facades\View',
      'YAML'         => 'Drupal\Laravel\YAML\Facades\YAML',
