@@ -18,7 +18,7 @@ class Environment extends BaseEnvironment {
       $view_info = pathinfo($view);
       $namespace = str_replace('/', '_', $view_info['dirname']);
       $this->addNamespace($namespace, $view_info['dirname']);
-      if($extension = $this->getExtension($view)){
+      if ($extension = $this->getExtension($view)){
         $path = $view;
         $view = str_replace($extension, '', $view_info['filename']);
       }

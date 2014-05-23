@@ -20,10 +20,10 @@ class DrupalConfigServiceProvider extends ServiceProvider {
    */
   public function register()
   {
-    $this->app->bindShared('drupalconfig', function($app)
-    {
-      $connection = $this->getDatabaseConnection();
-      $table = $this->app['config']['drupal.configtable'];
+    $this->app->bindShared('drupalconfig', function($app) {
+      $connection = $app['config']['cache.connection'];
+      $connection = $app['db']->connection($connection);
+      $table = $app['config']['drupal.configtable'];
 
       return new DrupalConfigStore($connection, $table);
     });

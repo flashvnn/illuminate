@@ -218,6 +218,8 @@ function illuminate_deliver_html_page($page_callback_result) {
   elseif (isset($page_callback_result)) {
     if ($page_callback_result instanceof Symfony\Component\HttpFoundation\Response) {
       $page_callback_result->send();
+      illuminate_drupal_page_footer();
+      exit();
     }
     else {
       if ($page_callback_result instanceof Illuminate\View\View) {
@@ -233,4 +235,22 @@ function illuminate_deliver_html_page($page_callback_result) {
 
 function illuminate_controller($controller, $action, $params = NULL) {
   return App::make($controller)->{$action}($params);
+}
+
+function illuminate_drupal_page_footer() {
+  global $user;
+
+  module_invoke_all('exit');
+
+  // Commit the user session, if needed.
+  drupal_session_commit();
+
+  if (variable_get('cache', 0) && ($cache = drupal_page_set_cache())) {
+    drupal_serve_page_from_cache($cache);
+  }
+
+  _registry_check_code(REGISTRY_WRITE_LOOKUP_CACHE);
+  drupal_cache_system_paths();
+  module_implements_write_cache();
+  system_run_automated_cron();
 }
