@@ -1,5 +1,7 @@
 <?php
 
 return array(
-  'configtable' => 'zm_config'
+  'db' => array(
+    'key_value' => 'key_value'
+   ),
 );

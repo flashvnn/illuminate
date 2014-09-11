@@ -24,6 +24,8 @@
   "autoload": {
     "psr-0": {
       "Drupal\\Laravel": "lib",
+      "Drupal\\Core": "lib",
+      "Drupal\\Component": "lib",
       "Drupal\\ZM": "lib"
     }
   }

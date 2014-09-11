@@ -522,4 +522,16 @@ class Application extends Container implements ResponsePreparerInterface {
   {
     return $this->booted;
   }
+
+  /**
+   * Fake function get provider by name.
+   *
+   * @param  string $provider
+   *
+   * @return mix
+   */
+  public function get($provider) {
+    return $this->make($provider);
+  }
+
 }

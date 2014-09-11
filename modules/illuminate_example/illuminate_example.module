@@ -77,7 +77,6 @@ function illuminate_example_detail_page($key) {
 }
 
 function illuminate_example_cache(){
-
   $cachedata = Cache::remember('illuminate_example_cache', 1/6, function(){
       return "Now is:" . date("Y-m-d h:i:s");
   });
@@ -86,8 +85,6 @@ function illuminate_example_cache(){
 }
 
 function illuminate_example_yamlconfig(){
-
-
   $config = YAML::load('illuminate_example');
   // Get all config variables.
   dpm($config->obtain(), "All variables: YAML::load('illuminate_example')->obtain():");
@@ -101,35 +98,14 @@ function illuminate_example_yamlconfig(){
 
 function illuminate_example_drupalassets(){
   //DrupalAssets::css("{module-illuminate_example}/theme/mytheme.css");
-
-  DrupalAssets::module("illuminate_example")->css("theme/mytheme.css");
-
   return "DrupalAssets test, load css change style of " . check_plain('<h1>');
 }
 
 function illuminate_example_drupalconfig(){
-  $output = array();
-  $output[] = "Put value for illuminate_example::key-1";
-  DrupalConfig::put("illuminate_example", "key-1", "value-1");
+  $illuminate_example = Drupal::keyValue("illuminate_example");
 
-  $output[] = ("Put value for illuminate_example::key-2");
-  DrupalConfig::put("illuminate_example", "key-2", "value-2");
-
-  $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
-  $output[] = ("illuminate_example::key-2::" . DrupalConfig::get("illuminate_example", "key-2"));
-
-  $output[] = ("Remove illuminate_example::key-1");
-  DrupalConfig::forget("illuminate_example", "key-1");
-  $output[] = ("illuminate_example::key-1::" . DrupalConfig::get("illuminate_example", "key-1"));
-  $output[] = ("All illuminate_example keys");
-  $output[] = (DrupalConfig::all("illuminate_example"));
-
-  $output[] = ("Remove all illuminate_example keys");
-  DrupalConfig::flush("illuminate_example");
-  $output[] = ("Check illuminate_example keys::");
-
-  $output[] = (DrupalConfig::all("illuminate_example"));
-  dpm($output);
+  $illuminate_example->set("demo", "demo-value");
+  dpm($illuminate_example->get("demo"));
 
   return "Drupal config";
 }
@@ -140,7 +116,8 @@ function illuminate_example_drupalconfig(){
  * @return string
  */
 function illuminate_example_viewrender() {
-  $template = illuminate_realpath('{module-illuminate_example}/theme/mytheme.tpl.php');
+  //$template = illuminate_realpath('{module-illuminate_example}/theme/mytheme.tpl.php');
+  $template = "demo";
 
   return ViewRender::make($template, array("name" => "HKT"));
 }
@@ -159,7 +136,6 @@ function illuminate_example_sendemail() {
 
 
 function illuminate_example_response() {
-
   return Response::json(user_load(1));
 }
 

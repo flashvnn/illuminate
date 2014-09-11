@@ -10,6 +10,28 @@
 function illuminate_init() {
   illuminate_load_instance();
 }
+
+/**
+ * Render block of module with detal.
+ *
+ * @param  string $module
+ *   Module name
+ * @param  string $delta
+ *   The block delta
+ *
+ * @return string
+ */
+function illuminate_block_render($module, $block_id) {
+  if ($block = block_load($module, $block_id)) {
+    $block_content = _block_render_blocks(array($block));
+    $build = _block_get_renderable_array($block_content);
+    $block_rendered = drupal_render($build);
+    return $block_rendered;
+  }
+
+  return FALSE;
+}
+
 /**
  * Implements hook_page_delivery_callback_alter().
  */
@@ -37,6 +59,8 @@ function illuminate_load_instance(){
       $app['path.storage'] = variable_get('file_public_path', conf_path() . '/files');
       $app->startExceptionHandling();
       $app->boot();
+      require_once __DIR__ . "/lib/Drupal.php";
+      Drupal::setContainer($app);
       $loaded = TRUE;
     }else{
       illuminate_warning();
@@ -113,21 +137,24 @@ function illuminate_realpath($file){
 /**
  * Implements hook_block_info().
  */
-function illuminate_block_info() {
+/*function illuminate_block_info() {
   if(illuminate_load_instance()){
     return with(new \Drupal\ZM\Hook\BlockInfo())->import();
   }
 
   return array();
-}
+}*/
 
 /**
  * Implements hook_block_view().
  */
-function illuminate_block_view($delta = '') {
+/*function illuminate_block_view($delta = '') {
   return with(new \Drupal\ZM\Hook\BlockView($delta))->view();
-}
+}*/
 
+/**
+ * Custom deliver_html_page.
+ */
 function illuminate_deliver_html_page($page_callback_result) {
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
@@ -218,7 +245,7 @@ function illuminate_deliver_html_page($page_callback_result) {
   elseif (isset($page_callback_result)) {
     if ($page_callback_result instanceof Symfony\Component\HttpFoundation\Response) {
       $page_callback_result->send();
-      illuminate_drupal_page_footer();
+      ajax_footer();
       exit();
     }
     else {
@@ -231,26 +258,4 @@ function illuminate_deliver_html_page($page_callback_result) {
 
   // Perform end-of-request tasks.
   drupal_page_footer();
-}
-
-function illuminate_controller($controller, $action, $params = NULL) {
-  return App::make($controller)->{$action}($params);
-}
-
-function illuminate_drupal_page_footer() {
-  global $user;
-
-  module_invoke_all('exit');
-
-  // Commit the user session, if needed.
-  drupal_session_commit();
-
-  if (variable_get('cache', 0) && ($cache = drupal_page_set_cache())) {
-    drupal_serve_page_from_cache($cache);
-  }
-
-  _registry_check_code(REGISTRY_WRITE_LOOKUP_CACHE);
-  drupal_cache_system_paths();
-  module_implements_write_cache();
-  system_run_automated_cron();
 }

@@ -1,6 +1,4 @@
 <?php namespace Drupal\Laravel\Assets;
-
-
 /**
 * Assets
 */

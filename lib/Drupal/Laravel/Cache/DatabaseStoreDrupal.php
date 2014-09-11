@@ -37,70 +37,69 @@ class DatabaseStoreDrupal implements StoreInterface {
   /**
    * Create a new database store.
    *
-   * @param  \Illuminate\Database\Connection  $connection
-   * @param  \Illuminate\Encryption\Encrypter  $encrypter
-   * @param  string  $table
-   * @param  string  $prefix
-   * @return void
+   * @param  \Illuminate\Database\Connection $connection
+   * @param  \Illuminate\Encryption\Encrypter $encrypter
+   * @param  string $table
+   * @param  string $prefix
+   *
+   * @return \Drupal\Laravel\Cache\DatabaseStoreDrupal
    */
-  public function __construct(Connection $connection, Encrypter $encrypter, $table, $prefix = '')
-  {
-    $this->table = $table;
-    $this->prefix = $prefix;
-    $this->encrypter = $encrypter;
+  public function __construct(Connection $connection, Encrypter $encrypter, $table, $prefix = '') {
+    $this->table      = $table;
+    $this->prefix     = $prefix;
+    $this->encrypter  = $encrypter;
     $this->connection = $connection;
   }
 
   /**
    * Retrieve an item from the cache by key.
    *
-   * @param  string  $key
+   * @param  string $key
+   *
    * @return mixed
    */
-  public function get($key)
-  {
-    $prefixed = $this->prefix.$key;
-    $cache = cache_get($prefixed, $this->table);
+  public function get($key) {
+    $prefixed = $this->prefix . $key;
+    $cache    = cache_get($prefixed, $this->table);
     if ($cache) {
-      if (time() >= $cache->expire)
-      {
+      if (time() >= $cache->expire) {
         return $this->forget($key);
       }
     }
 
-    return $cache ? $cache->data: null;
-/*    $prefixed = $this->prefix.$key;
+    return $cache ? $cache->data : NULL;
+    /*    $prefixed = $this->prefix.$key;
 
-    $cache = $this->table()->where('key', '=', $prefixed)->first();
+        $cache = $this->table()->where('key', '=', $prefixed)->first();
 
-    // If we have a cache record we will check the expiration time against current
-    // time on the system and see if the record has expired. If it has, we will
-    // remove the records from the database table so it isn't returned again.
-    if ( ! is_null($cache))
-    {
-      if (is_array($cache)) $cache = (object) $cache;
+        // If we have a cache record we will check the expiration time against current
+        // time on the system and see if the record has expired. If it has, we will
+        // remove the records from the database table so it isn't returned again.
+        if ( ! is_null($cache))
+        {
+          if (is_array($cache)) $cache = (object) $cache;
 
-      if (time() >= $cache->expiration)
-      {
-        return $this->forget($key);
-      }
+          if (time() >= $cache->expiration)
+          {
+            return $this->forget($key);
+          }
 
-      return $this->encrypter->decrypt($cache->value);
-    }*/
+          return $this->encrypter->decrypt($cache->value);
+        }*/
   }
 
   /**
    * Store an item in the cache for a given number of minutes.
    *
-   * @param  string  $key
-   * @param  mixed   $value
-   * @param  int     $minutes
+   * @param  string $key
+   * @param  mixed $value
+   * @param  int $minutes
+   *
    * @return void
    */
-  public function put($key, $value, $minutes)
-  {
-    $key = $this->prefix.$key;
-    $expiration = $this->getTime() + ($minutes * 60);
+  public function put($key, $value, $minutes) {
+    $key        = $this->prefix . $key;
+    $expiration = $this->getTime() + ( $minutes * 60 );
     cache_set($key, $value, $this->table, $expiration);
 
     /*
@@ -127,28 +126,28 @@ class DatabaseStoreDrupal implements StoreInterface {
   /**
    * Increment the value of an item in the cache.
    *
-   * @param  string  $key
-   * @param  mixed   $value
+   * @param  string $key
+   * @param  mixed $value
+   *
    * @return void
    *
    * @throws \LogicException
    */
-  public function increment($key, $value = 1)
-  {
+  public function increment($key, $value = 1) {
     throw new \LogicException("Increment operations not supported by this driver.");
   }
 
   /**
    * Increment the value of an item in the cache.
    *
-   * @param  string  $key
-   * @param  mixed   $value
+   * @param  string $key
+   * @param  mixed $value
+   *
    * @return void
    *
    * @throws \LogicException
    */
-  public function decrement($key, $value = 1)
-  {
+  public function decrement($key, $value = 1) {
     throw new \LogicException("Increment operations not supported by this driver.");
   }
 
@@ -157,32 +156,31 @@ class DatabaseStoreDrupal implements StoreInterface {
    *
    * @return int
    */
-  protected function getTime()
-  {
+  protected function getTime() {
     return time();
   }
 
   /**
    * Store an item in the cache indefinitely.
    *
-   * @param  string  $key
-   * @param  mixed   $value
+   * @param  string $key
+   * @param  mixed $value
+   *
    * @return void
    */
-  public function forever($key, $value)
-  {
+  public function forever($key, $value) {
     return $this->put($key, $value, 5256000);
   }
 
   /**
    * Remove an item from the cache.
    *
-   * @param  string  $key
+   * @param  string $key
+   *
    * @return void
    */
-  public function forget($key)
-  {
-    $key = $this->prefix.$key;
+  public function forget($key) {
+    $key = $this->prefix . $key;
     cache_clear_all($key, $this->table);
     //$this->table()->where('cid', '=', $this->prefix.$key)->delete();
   }
@@ -192,8 +190,7 @@ class DatabaseStoreDrupal implements StoreInterface {
    *
    * @return void
    */
-  public function flush()
-  {
+  public function flush() {
     $this->table()->delete();
   }
 
@@ -202,8 +199,7 @@ class DatabaseStoreDrupal implements StoreInterface {
    *
    * @return \Illuminate\Database\Query\Builder
    */
-  protected function table()
-  {
+  protected function table() {
     return $this->connection->table($this->table);
   }
 
@@ -212,8 +208,7 @@ class DatabaseStoreDrupal implements StoreInterface {
    *
    * @return \Illuminate\Database\Connection
    */
-  public function getConnection()
-  {
+  public function getConnection() {
     return $this->connection;
   }
 
@@ -222,8 +217,7 @@ class DatabaseStoreDrupal implements StoreInterface {
    *
    * @return \Illuminate\Encryption\Encrypter
    */
-  public function getEncrypter()
-  {
+  public function getEncrypter() {
     return $this->encrypter;
   }
 
@@ -232,8 +226,7 @@ class DatabaseStoreDrupal implements StoreInterface {
    *
    * @return string
    */
-  public function getPrefix()
-  {
+  public function getPrefix() {
     return $this->prefix;
   }
 

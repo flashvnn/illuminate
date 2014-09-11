@@ -21,9 +21,8 @@ class DrupalAssetsServiceProvider extends ServiceProvider {
    */
   public function register()
   {
-    $this->app->bindShared('drupalassets', function($app)
-    {
-      return new DrupalAssets($connection, $table);
+    $this->app->bindShared('drupalassets', function($app) {
+      return new DrupalAssets();
     });
 
   }
