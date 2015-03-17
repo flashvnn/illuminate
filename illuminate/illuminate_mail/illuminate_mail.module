@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Module main file.
+ */
+ 
+require_once 'IlluminateMailSystem.php';
+
+/**
+ * Get all send emails id key.
+ *
+ * @return array
+ */
+function illuminate_mail_keys() {
+  $keys = array(
+    array("email_admin_created"         => "user_mail_register_admin_created"),
+    array("email_pending_approval"      => "user_mail_register_pending_approval"),
+    array("email_no_approval_required"  => "user_mail_register_no_approval_required"),
+    array("email_password_reset"        => "user_mail_password_reset"),
+    array("email_activated"             => array("user_mail_status_activated")),
+    array("email_blocked"               => array("user_mail_status_blocked")),
+    array("email_cancel_confirm"        => "user_mail_cancel_confirm"),
+    array("email_canceled"              => array("user_mail_status_canceled")),
+  );
+
+  return $keys;
+}
+
+/**
+ * Implement hook_form_alter().
+ */
+function illuminate_mail_form_user_admin_settings_alter(&$form, &$form_state) {
+  $keys = illuminate_mail_keys();
+  foreach ($keys as $data) {
+    foreach ($data as $key => $item) {
+      if (is_array($item)) {
+        $form[$key]['settings'][$item[0] .'_body']['#type'] = 'text_format';
+        $form[$key]['settings'][$item[0] .'_body']['#format'] = 'full_html';
+      }else{
+        $form[$key][$item .'_body']['#type'] = 'text_format';
+        $form[$key][$item .'_body']['#format'] = 'full_html';
+      }
+    }
+  }
+
+  // add validation function to alter field value before submit (before saving it to variable tables)
+  $form['#validate'][] = 'illuminate_mail_system_settings_form_validate';
+}
+
+
+function illuminate_mail_system_settings_form_validate(&$form, &$form_state) {
+  $keys = illuminate_mail_keys();
+  foreach ($keys as $data) {
+    foreach ($data as $key => $item) {
+      if (is_array($item)) {
+        $html = $form_state['values'][$item[0] .'_body'];
+        form_set_value($form[$key]['settings'][$item[0] .'_body'], $html['value'], $form_state);
+      }else{
+        $html = $form_state['values'][$item .'_body'];
+        form_set_value($form[$key][$item .'_body'], $html['value'], $form_state);
+      }
+    }
+  }
+}

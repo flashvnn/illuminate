@@ -1,0 +1,9 @@
+name = illuminate Core
+description = illuminate Core module
+package = illuminate
+core = 7.x
+version = 7.x-1.x
+
+;files[] =
+dependencies[] = libraries
+dependencies[] = laravel_manager

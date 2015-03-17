@@ -1,0 +1,334 @@
+<?php
+
+/**
+ * @file
+ * illuminate main file.
+ */
+define("MENU_ILLUMINATE_ROUTE", 2906);
+require_once "lib/Drupal.php";
+/**
+ * Implements hook_init().
+ */
+function illuminate_init() {
+  if (illuminate_load_instance()) {
+    Drupal::getContainer()->bind('helper.path', function(){
+      return new \Drupal\Helper\Path\Path();
+    }, TRUE);
+
+    Drupal::getContainer()->bind('contentRender', function(){
+      return new \Drupal\Content\ContentRender();
+    }, TRUE);
+  }
+}
+
+/**
+ * Load modules with config depended on illuminate.
+ *
+ * @param string $base_module
+ * @param string $config_file
+ *
+ * @return mixed
+ */
+function illuminate_modules($base_module = 'illuminate', $config_file = '') {
+  return Cache::rememberForever('illuminate_modules_' . $base_module, function() use($base_module, $config_file)
+  {
+    $module_enabled = system_list('module_enabled');
+    return with(new \Drupal\Module\ModulesFetcher($base_module, $config_file))
+      ->fetch($module_enabled);
+  });
+}
+
+/**
+ * Implements hook_menu().
+ */
+function illuminate_menu() {
+  $items = array();
+  $routeCollection = Route::getRoutes();
+  foreach ($routeCollection as $value) {
+    /** @var $value Illuminate\Routing\Route */
+    $path = $value->getPath();
+    $path = preg_replace('/\{(.*?)\}/', "%", $path);
+    $items[$path] = array(
+      'title'            => '',
+      'description'      => '',
+      'access callback'  => 'user_access',
+      'access arguments' => array('access content'),
+      'page callback'    => 'illuminate_route',
+      'page arguments'   => array(),
+      'type'             => MENU_CALLBACK,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Route callback for laravel route.
+ *
+ * @return int
+ */
+function illuminate_route() {
+  return MENU_ILLUMINATE_ROUTE;
+}
+
+/**
+ * Call controller.
+ *
+ * @param $controller_action
+ * @param null $params
+ *
+ * @return mixed
+ */
+function illuminate_controller($controller_action, $params = NULL) {
+  if (str_contains($controller_action, '@')) {
+    list($controller, $action) = explode("@", $controller_action);
+  }
+  else {
+    list($controller, $action) = explode("::", $controller_action);
+  }
+
+  return app($controller)->{$action}($params);
+}
+
+/**
+ * Implements hook_block_info().
+ */
+/*function illuminate_block_info() {
+  //$blocks = with(new \Drupal\Block\BlockInfo())->import();
+  $blocks = array();
+  return $blocks;
+}*/
+
+/**
+ * Implements hook_block_view().
+ */
+/*function illuminate_block_view($delta = '') {
+  //return with(new \Drupal\Block\BlockView($delta))->view();
+}*/
+
+/**
+ * Forget cache when
+ */
+function illuminate_forget_cache(){
+  foreach (array("blocks", "links.menu") as $item) {
+    Cache::forget("illuminate_modules_" . $item);
+  }
+}
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function illuminate_modules_enabled($modules) {
+  illuminate_forget_cache();
+}
+
+/**
+ * Implements hook_modules_disabled().
+ */
+function illuminate_modules_disabled($modules) {
+  illuminate_forget_cache();
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function illuminate_flush_caches() {
+  illuminate_forget_cache();
+  return array();
+}
+
+/**
+ * Load illuminate libraries.
+ *
+ * @return bool
+ */
+function illuminate_load_instance(){
+  static $loaded = FALSE;
+  if (!$loaded && class_exists('Illuminate\Foundation\Application')) {
+    $path = realpath(libraries_get_path('laravel'));
+    $loader = ComposerAutoloaderInitComposerManager::getLoader();
+    $loader->addPsr4("App\\", $path . "/app");
+    $loader->add("Drupal\\", drupal_get_path('module', 'illuminate') . "/src");
+
+    $app = new Drupal\Illuminate\Application(
+      $path
+    );
+
+    $app->singleton(
+      'Illuminate\Contracts\Http\Kernel',
+      'App\Http\Kernel'
+    );
+    $app->singleton(
+      'Illuminate\Contracts\Console\Kernel',
+      'App\Console\Kernel'
+    );
+    $app->singleton(
+      'Illuminate\Contracts\Debug\ExceptionHandler',
+      'App\Exceptions\Handler'
+    );
+
+    Drupal::setContainer(app());
+    drupal_alter('illuminate_load', $loader);
+
+    /** @var $kernel Illuminate\Contracts\Http\Kernel */
+    $kernel  = $app->make('Illuminate\Contracts\Http\Kernel');
+    $request = Illuminate\Http\Request::capture();
+    $app->instance('request', $request);
+    \Illuminate\Support\Facades\Facade::clearResolvedInstance('request');
+    $kernel->bootstrap();
+    $loaded = $kernel;
+  }
+
+  return $loaded;
+}
+
+
+/**
+ * Implements hook_page_delivery_callback_alter().
+ */
+function illuminate_page_delivery_callback_alter(&$callback) {
+  if ($callback == 'drupal_deliver_html_page') {
+    $callback = 'illuminate_deliver_html_page';
+  }
+}
+
+function _drupal_page_not_found(){
+  // Print a 404 page.
+  drupal_add_http_header('Status', '404 Not Found');
+
+  watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+
+  // Check for and return a fast 404 page if configured.
+  drupal_fast_404();
+
+  // Keep old path for reference, and to allow forms to redirect to it.
+  if (!isset($_GET['destination'])) {
+    $_GET['destination'] = $_GET['q'];
+  }
+
+  $path = drupal_get_normal_path(variable_get('site_404', ''));
+  if ($path && $path != $_GET['q']) {
+    // Custom 404 handler. Set the active item in case there are tabs to
+    // display, or other dependencies on the path.
+    menu_set_active_item($path);
+    $return = menu_execute_active_handler($path, FALSE);
+  }
+
+  if (empty($return) || $return == MENU_NOT_FOUND || $return == MENU_ACCESS_DENIED) {
+    // Standard 404 handler.
+    drupal_set_title(t('Page not found'));
+    $return = t('The requested page "@path" could not be found.', array('@path' => request_uri()));
+  }
+
+  drupal_set_page_content($return);
+  $page = element_info('page');
+  print drupal_render_page($page);
+}
+
+/**
+ * Custom deliver_html_page.
+ */
+function illuminate_deliver_html_page($page_callback_result) {
+  // Emit the correct charset HTTP header, but not if the page callback
+  // result is NULL, since that likely indicates that it printed something
+  // in which case, no further headers may be sent, and not if code running
+  // for this page request has already set the content type header.
+  if (isset($page_callback_result) && is_null(drupal_get_http_header('Content-Type'))) {
+    drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+  }
+
+  // Send appropriate HTTP-Header for browsers and search engines.
+  global $language;
+  drupal_add_http_header('Content-Language', $language->language);
+
+  // Menu status constants are integers; page content is a string or array.
+  if (is_int($page_callback_result)) {
+    // @todo: Break these up into separate functions?
+    switch ($page_callback_result) {
+      case MENU_ILLUMINATE_ROUTE:
+        $kernel = illuminate_load_instance();
+        $request = app('request');
+        $response = $kernel->handle($request);
+
+        //TODO: check correct Response here
+        if ($response instanceof \Illuminate\Http\Response) {
+          /* @var $response \Illuminate\Http\Response */
+          $return = $response->getContent();
+          drupal_set_page_content($return);
+          $page = element_info('page');
+          print drupal_render_page($page);
+        }
+        /* Check if Response is JSON Response or other Response data. */
+        else if ($response instanceof \Symfony\Component\HttpFoundation\Response) {
+          // Check route is validated.
+          if(\Route::getCurrentRoute()){
+            $response->send();
+            $kernel->terminate($request, $response);
+            exit();
+          }
+          _drupal_page_not_found();
+        }
+        else{
+          _drupal_page_not_found();
+        }
+        break;
+
+      case MENU_NOT_FOUND:
+        /* Dislay Drupal page not found page. */
+        _drupal_page_not_found();
+
+        break;
+      case MENU_ACCESS_DENIED:
+        // Print a 403 page.
+        drupal_add_http_header('Status', '403 Forbidden');
+        watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+
+        // Keep old path for reference, and to allow forms to redirect to it.
+        if (!isset($_GET['destination'])) {
+          $_GET['destination'] = $_GET['q'];
+        }
+
+        $path = drupal_get_normal_path(variable_get('site_403', ''));
+        if ($path && $path != $_GET['q']) {
+          // Custom 403 handler. Set the active item in case there are tabs to
+          // display or other dependencies on the path.
+          menu_set_active_item($path);
+          $return = menu_execute_active_handler($path, FALSE);
+        }
+
+        if (empty($return) || $return == MENU_NOT_FOUND || $return == MENU_ACCESS_DENIED) {
+          // Standard 403 handler.
+          drupal_set_title(t('Access denied'));
+          $return = t('You are not authorized to access this page.');
+        }
+
+        print drupal_render_page($return);
+        break;
+
+      case MENU_SITE_OFFLINE:
+        // Print a 503 page.
+        drupal_maintenance_theme();
+        drupal_add_http_header('Status', '503 Service unavailable');
+        drupal_set_title(t('Site under maintenance'));
+        print theme('maintenance_page', array('content' => filter_xss_admin(variable_get('maintenance_mode_message',
+          t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => variable_get('site_name', 'Drupal')))))));
+        break;
+    }
+  }
+  elseif (isset($page_callback_result)) {
+    if ($page_callback_result instanceof Symfony\Component\HttpFoundation\Response) {
+      $page_callback_result->send();
+      ajax_footer();
+      exit();
+    }
+    else {
+      if ($page_callback_result instanceof Illuminate\View\View) {
+        $page_callback_result = $page_callback_result->render();
+      }
+      print drupal_render_page($page_callback_result);
+    }
+  }
+
+  // Perform end-of-request tasks.
+  drupal_page_footer();
+}

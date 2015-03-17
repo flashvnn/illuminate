@@ -1,0 +1,8 @@
+name = illuminate Mail
+description = Integrate illuminate mail with Drupal
+package = illuminate
+core = 7.x
+version = 7.x-1.x
+
+;files[] =
+dependencies[] = illuminate

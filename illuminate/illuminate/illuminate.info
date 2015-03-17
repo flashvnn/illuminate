@@ -1,0 +1,7 @@
+name = Illuminate
+description = Integrate with Laravel Illuminate
+package = illuminate
+core = 7.x
+version = 7.x-1.x
+
+dependencies[] = illuminate_core
