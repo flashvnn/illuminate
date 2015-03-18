@@ -6,6 +6,13 @@ Install
 ---------------------
 
 1. Install requirements module libraries and composer-manager.
+   The Laravel framework has a few system requirements:
+    PHP >= 5.4
+    Mcrypt PHP Extension
+    OpenSSL PHP Extension
+    Mbstring PHP Extension
+    Tokenizer PHP Extension
+
 2. Download laravel libraries here:
    https://github.com/flashvnn/laravel/archive/master.zip
    Extract laravel to sites/all/libraries and make sure it have structure
