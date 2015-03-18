@@ -12,7 +12,7 @@ function illuminate_demo_menu() {
     'access callback'  => 'user_access',
     'access arguments' => array('access content'),
     'page callback'    => 'illuminate_controller',
-    'page arguments'   => array('Drupa\illuminate_demo\Controller\DemoController::index'),
+    'page arguments'   => array('\Drupal\illuminate_demo\Controller\DemoController::index'),
     'type'             => MENU_CALLBACK,
   );
 
@@ -23,7 +23,7 @@ function illuminate_demo_menu() {
     'access callback'  => 'user_access',
     'access arguments' => array('access content'),
     'page callback'    => 'illuminate_controller',
-    'page arguments'   => array('Drupa\illuminate_demo\Controller\DemoController::json'),
+    'page arguments'   => array('\Drupal\illuminate_demo\Controller\DemoController::json'),
     'type'             => MENU_CALLBACK,
   );
 
