@@ -21,7 +21,7 @@ function illuminate_core_install() {
     "public://storage/logs",
   );
   foreach ($folders as $folder) {
-    file_prepare_directory($folder);
+    file_prepare_directory($folder, FILE_CREATE_DIRECTORY);
     // Add htaccess protection
     file_create_htaccess($folder);
   }
