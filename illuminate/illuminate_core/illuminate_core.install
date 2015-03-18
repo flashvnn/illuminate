@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the  module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function illuminate_core_install() {
+  // Create storage folder
+  $folders = array(
+    "public://storage",
+    "public://storage/app",
+    "public://storage/framework",
+    "public://storage/framework/cache",
+    "public://storage/framework/sessions",
+    "public://storage/framework/views",
+    "public://storage/framework/views",
+    "public://storage/logs",
+  );
+  foreach ($folders as $folder) {
+    file_prepare_directory($folder);
+    // Add htaccess protection
+    file_create_htaccess($folder);
+  }
+
+}
