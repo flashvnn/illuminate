@@ -6,4 +6,4 @@ version = 7.x-1.x
 
 ;files[] =
 dependencies[] = libraries
-dependencies[] = laravel_manager
+dependencies[] = composer_manager
