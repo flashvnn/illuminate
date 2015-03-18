@@ -24,6 +24,7 @@ Install
    Drush will enable module iluuminate_core and install all laravel framework with composer
 
 4. After installed illuminate_core now you can ready to install main module illuminate.
+   Easy instal with Drush command: drush en illuminate -y
 
 Now Laravel ready for working Drupal.
 
