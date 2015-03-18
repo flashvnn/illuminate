@@ -1,0 +1,8 @@
+name = illuminate Demo
+description = Demo using Laravel illuminate with Drupal
+package = illuminate
+core = 7.x
+version = 7.x-1.x
+
+dependencies[] = illuminate
+dependencies[] = xautoload

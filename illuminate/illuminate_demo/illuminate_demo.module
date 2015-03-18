@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function illuminate_demo_menu() {
+  $items = array();
+
+  $items['illuminate_demo'] = array(
+    'title'            => 'Demo Controller',
+    'description'      => 'Demo using controller with Drupal',
+    'access callback'  => 'user_access',
+    'access arguments' => array('access content'),
+    'page callback'    => 'illuminate_controller',
+    'page arguments'   => array('Drupa\illuminate_demo\Controller\DemoController::index'),
+    'type'             => MENU_CALLBACK,
+  );
+
+
+  $items['illuminate_demo_json'] = array(
+    'title'            => 'Demo Controller',
+    'description'      => 'Demo using controller with Drupal',
+    'access callback'  => 'user_access',
+    'access arguments' => array('access content'),
+    'page callback'    => 'illuminate_controller',
+    'page arguments'   => array('Drupa\illuminate_demo\Controller\DemoController::json'),
+    'type'             => MENU_CALLBACK,
+  );
+
+
+  return $items;
+}
