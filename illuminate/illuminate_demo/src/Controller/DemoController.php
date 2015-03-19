@@ -12,4 +12,8 @@ class DemoController extends Controller{
   public function json(){
     return \Response::json(array("data" => "value"));
   }
+
+  public function form(){
+    return \Drupal::formBuilder()->getForm('Drupal\illuminate_demo\Form\DemoForm');
+  }
 }

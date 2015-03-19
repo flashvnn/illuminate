@@ -6,27 +6,36 @@
 function illuminate_demo_menu() {
   $items = array();
 
-  $items['illuminate_demo'] = array(
+  $items['illuminate-demo'] = array(
     'title'            => 'Demo Controller',
     'description'      => 'Demo using controller with Drupal',
     'access callback'  => 'user_access',
     'access arguments' => array('access content'),
     'page callback'    => 'illuminate_controller',
-    'page arguments'   => array('\Drupal\illuminate_demo\Controller\DemoController::index'),
+    'page arguments'   => array('Drupal\illuminate_demo\Controller\DemoController::index'),
     'type'             => MENU_CALLBACK,
   );
 
 
-  $items['illuminate_demo_json'] = array(
+  $items['illuminate-demo-json'] = array(
     'title'            => 'Demo Controller',
     'description'      => 'Demo using controller with Drupal',
     'access callback'  => 'user_access',
     'access arguments' => array('access content'),
     'page callback'    => 'illuminate_controller',
-    'page arguments'   => array('\Drupal\illuminate_demo\Controller\DemoController::json'),
+    'page arguments'   => array('Drupal\illuminate_demo\Controller\DemoController::json'),
     'type'             => MENU_CALLBACK,
   );
 
+  $items['illuminate-demo-form'] = array(
+    'title'            => 'Demo Controller',
+    'description'      => 'Demo using controller with Drupal',
+    'access callback'  => 'user_access',
+    'access arguments' => array('access content'),
+    'page callback'    => 'illuminate_controller',
+    'page arguments'   => array('Drupal\illuminate_demo\Controller\DemoController::form'),
+    'type'             => MENU_CALLBACK,
+  );
 
   return $items;
 }

@@ -81,6 +81,16 @@ class Drupal {
   }
 
   /**
+   * Returns the form builder service.
+   *
+   * @return \Drupal\Core\Form\FormBuilderInterface
+   *   The form builder.
+   */
+  public static function formBuilder() {
+    return static::$container->make('form_builder');
+  }
+
+  /**
    * Returns the current primary database.
    *
    * @return Database
