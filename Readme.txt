@@ -1,8 +1,8 @@
-Laravel Illuminate
+===Laravel Illuminate
 
 Integrate Laravel Illuminate with Drupal
 
-Install
+===Install
 ---------------------
 
 1. Install requirements module libraries and composer-manager.
