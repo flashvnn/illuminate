@@ -30,12 +30,12 @@ Now Laravel ready for working Drupal.
 
 Open file sites/all/libraries/laravel/app/Http/routes.php
 
-Route::get('/laravel', array(
-  function()
-  {
-    return "Welcome Laravel";
-  }
-));
+      Route::get('/laravel', array(
+      function()
+      {
+         return "Welcome Laravel";
+      }
+      ));
 
 Clear Drupal cache and visit your site with url yoursite.dev/laravel with yoursite.dev is your website domain,
 you will see the magic.
@@ -44,18 +44,15 @@ More information about Laravel 5 route and other information you can view here: 
 
 To use controller with hook_menu in Drupal module you can define menu like bellow:
 
-/**
- * Implements hook_menu().
- */
-$items['illuminate_demo'] = array(
-    'title'            => 'Demo Controller',
-    'description'      => 'Demo using controller with Drupal',
-    'access callback'  => 'user_access',
-    'access arguments' => array('access content'),
-    'page callback'    => 'illuminate_controller',
-    'page arguments'   => array('Drupa\illuminate_demo\Controller\DemoController::index'),
-    'type'             => MENU_CALLBACK,
-);
+      $items['illuminate_demo'] = array(
+		   'title'            => 'Demo Controller',
+		   'description'      => 'Demo using controller with Drupal',
+		   'access callback'  => 'user_access',
+		   'access arguments' => array('access content'),
+		   'page callback'    => 'illuminate_controller',
+		   'page arguments'   => array('Drupa\illuminate_demo\Controller\DemoController::index'),
+		   'type'             => MENU_CALLBACK,
+	   );
 
 the "page arguments" params is Controller class with function will called when visit the url.
 You can use with xautoload to create controller class like Drupal 8 style.
