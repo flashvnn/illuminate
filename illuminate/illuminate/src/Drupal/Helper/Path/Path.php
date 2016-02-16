@@ -47,7 +47,7 @@ class Path {
    *
    * @return mixed|string
    */
-  public function realPath($file) {
+  public function real_path($file) {
     $file = trim($file);
 
     if (strpos($file, '{') === FALSE) {

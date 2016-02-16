@@ -26,4 +26,8 @@ function illuminate_core_install() {
     file_create_htaccess($folder);
   }
 
+  db_update('system')
+    ->fields(array('weight' => -10))
+    ->condition('name', 'illuminate_core', '=')
+    ->execute();
 }

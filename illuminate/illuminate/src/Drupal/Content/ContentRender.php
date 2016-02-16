@@ -36,6 +36,8 @@ class ContentRender implements ContentRenderInterface{
       }
       else if ($content_data = array_get($this->data, 'content.data')) {
         $return['#markup'] = $content_data;
+      }else{
+        $return['content'] = $this->data;
       }
 
       if (isset($this->data['attached'])) {
@@ -56,7 +58,7 @@ class ContentRender implements ContentRenderInterface{
       foreach ($this->data['attached'][$type] as $k => $item) {
         if (is_string($item)) {
           $this->data['attached'][$type][$k] = array(
-            'data' => \Drupal::real_path($item),
+            'data' => \Drupal::realPath($item),
             'group' => ($type == 'css') ? CSS_THEME : JS_THEME
           );
         }

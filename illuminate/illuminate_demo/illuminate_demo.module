@@ -37,5 +37,47 @@ function illuminate_demo_menu() {
     'type'             => MENU_CALLBACK,
   );
 
+  $items['illuminate-demo-event'] = array(
+    'title'            => 'Demo Event',
+    'description'      => 'Demo using Event with Drupal',
+    'access callback'  => 'user_access',
+    'access arguments' => array('access content'),
+    'page callback'    => 'illuminate_controller',
+    'page arguments'   => array('Drupal\illuminate_demo\Controller\DemoController::event'),
+    'type'             => MENU_CALLBACK,
+  );
+
+  $items['illuminate-demo-event-class'] = array(
+    'title'            => 'Demo Event Class',
+    'description'      => 'Demo using Event Class with Drupal',
+    'access callback'  => 'user_access',
+    'access arguments' => array('access content'),
+    'page callback'    => 'illuminate_controller',
+    'page arguments'   => array('Drupal\illuminate_demo\Controller\DemoController::eventClass'),
+    'type'             => MENU_CALLBACK,
+  );
+
+
   return $items;
+}
+
+
+/**
+ * Implements hook_illuminate_load_alter().
+ */
+function illuminate_demo_illuminate_load_alter(&$loader) {
+  // register events listener.
+  \Event::listen('events.demo', function($event = NULL){
+      return "Listened event.";
+  });
+
+  //subscriber event class
+  \Event::subscribe('Drupal\illuminate_demo\Handlers\DemoEventHandler');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function illuminate_demo_form_illuminate_demo_form_alter(&$form, &$form_state, $form_id) {
+  dpm($form, 'illuminate_demo_form_illuminate_demo_form_alter');
 }

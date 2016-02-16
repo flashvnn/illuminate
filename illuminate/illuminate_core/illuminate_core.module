@@ -4,3 +4,10 @@
  * @file
  * Core file
  */
+
+/**
+ * Implements hook_boot().
+ */
+function illuminate_core_boot() {
+  require_once DRUPAL_ROOT . "/includes/common.inc";
+}

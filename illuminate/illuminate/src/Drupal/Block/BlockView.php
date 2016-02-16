@@ -27,7 +27,7 @@ class BlockView extends ResourceInfo{
     $block            = array();
     $block['subject'] = array_get($info, 'subject', "");
     try {
-      $block['content'] = \Drupal::service('contentRender')
+      $block['content'] = \Drupal::service('content.render')
                                  ->render(array('content' => $info['content']));
     } catch (\Exception $e) {
       $block['content'] = $e->getMessage();;

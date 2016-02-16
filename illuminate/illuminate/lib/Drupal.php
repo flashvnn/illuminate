@@ -170,7 +170,16 @@ class Drupal {
    *
    * @return mixed|string
    */
-  public static function real_path($path) {
+  public static function realPath($path) {
     return static::service('helper.path')->realPath($path);
+  }
+
+  /**
+   * Returns a key/value storage.
+   *
+   * @return \Drupal\Cache\KeyValueStoreInterface
+   */
+  public static function keyValue() {
+    return static::service('key_value');
   }
 }

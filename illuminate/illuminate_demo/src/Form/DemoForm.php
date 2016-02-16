@@ -12,6 +12,11 @@ namespace Drupal\illuminate_demo\Form;
 use Drupal\Core\Form\FormBase;
 
 class DemoForm extends FormBase{
+  public function getFormId() {
+    return 'illuminate_demo_form';
+  }
+
+
   public function buildForm(array &$form, array &$form_state) {
     $form['name'] = array(
       '#type'          => 'textfield',

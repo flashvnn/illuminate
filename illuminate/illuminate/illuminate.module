@@ -5,24 +5,17 @@
  * illuminate main file.
  */
 define("MENU_ILLUMINATE_ROUTE", 2906);
-require_once "lib/Drupal.php";
+require_once __DIR__ . "/lib/Drupal.php";
+require_once __DIR__ . "/includes/block.inc";
+require_once __DIR__ . "/includes/cache.inc";
+require_once __DIR__ . "/includes/form.inc";
+
+
 /**
  * Implements hook_init().
  */
 function illuminate_init() {
-  if (illuminate_load_instance()) {
-    Drupal::getContainer()->bind('helper.path', function(){
-      return new \Drupal\Helper\Path\Path();
-    }, TRUE);
-
-    Drupal::getContainer()->bind('contentRender', function(){
-      return new \Drupal\Content\ContentRender();
-    }, TRUE);
-
-    Drupal::getContainer()->bind('form_builder', function(){
-      return new Drupal\Core\Form\FormBuilder();
-    }, TRUE);
-  }
+  illuminate_load_instance();
 }
 
 /**
@@ -34,12 +27,14 @@ function illuminate_init() {
  * @return mixed
  */
 function illuminate_modules($base_module = 'illuminate', $config_file = '') {
-  return Cache::rememberForever('illuminate_modules_' . $base_module, function() use($base_module, $config_file)
-  {
-    $module_enabled = system_list('module_enabled');
-    return with(new \Drupal\Module\ModulesFetcher($base_module, $config_file))
-      ->fetch($module_enabled);
-  });
+  if (class_exists('\Cache')) {
+    return Cache::rememberForever('illuminate_modules_' . $base_module, function() use($base_module, $config_file)
+    {
+      $module_enabled = system_list('module_enabled');
+      $fetcher = new \Drupal\Module\ModulesFetcher($base_module, $config_file);
+      return $fetcher->fetch($module_enabled);
+    });
+  }
 }
 
 /**
@@ -47,20 +42,22 @@ function illuminate_modules($base_module = 'illuminate', $config_file = '') {
  */
 function illuminate_menu() {
   $items = array();
-  $routeCollection = Route::getRoutes();
-  foreach ($routeCollection as $value) {
-    /** @var $value Illuminate\Routing\Route */
-    $path = $value->getPath();
-    $path = preg_replace('/\{(.*?)\}/', "%", $path);
-    $items[$path] = array(
-      'title'            => '',
-      'description'      => '',
-      'access callback'  => 'user_access',
-      'access arguments' => array('access content'),
-      'page callback'    => 'illuminate_route',
-      'page arguments'   => array(),
-      'type'             => MENU_CALLBACK,
-    );
+  if (class_exists('Route')) {
+    $routeCollection = \Route::getRoutes();
+    foreach ($routeCollection as $value) {
+      /** @var $value Illuminate\Routing\Route */
+      $path = $value->getPath();
+      $path = preg_replace('/\{(.*?)\}/', "%", $path);
+      $items[$path] = array(
+        'title'            => '',
+        'description'      => '',
+        'access callback'  => 'user_access',
+        'access arguments' => array('access content'),
+        'page callback'    => 'illuminate_route',
+        'page arguments'   => array(),
+        'type'             => MENU_CALLBACK,
+      );
+    }
   }
 
   return $items;
@@ -79,66 +76,14 @@ function illuminate_route() {
  * Call controller.
  *
  * @param $controller_action
- * @param null $params
+ * @param array $params The array of params send to controoler method
  *
  * @return mixed
  */
-function illuminate_controller($controller_action, $params = NULL) {
-  if (str_contains($controller_action, '@')) {
-    list($controller, $action) = explode("@", $controller_action);
-  }
-  else {
-    list($controller, $action) = explode("::", $controller_action);
-  }
+function illuminate_controller($controller_action, $params = array()) {
+  $controller_action = str_replace('::', '@', $controller_action);
 
-  return app($controller)->{$action}($params);
-}
-
-/**
- * Implements hook_block_info().
- */
-/*function illuminate_block_info() {
-  //$blocks = with(new \Drupal\Block\BlockInfo())->import();
-  $blocks = array();
-  return $blocks;
-}*/
-
-/**
- * Implements hook_block_view().
- */
-/*function illuminate_block_view($delta = '') {
-  //return with(new \Drupal\Block\BlockView($delta))->view();
-}*/
-
-/**
- * Forget cache when
- */
-function illuminate_forget_cache(){
-  foreach (array("blocks", "links.menu") as $item) {
-    Cache::forget("illuminate_modules_" . $item);
-  }
-}
-
-/**
- * Implements hook_modules_enabled().
- */
-function illuminate_modules_enabled($modules) {
-  illuminate_forget_cache();
-}
-
-/**
- * Implements hook_modules_disabled().
- */
-function illuminate_modules_disabled($modules) {
-  illuminate_forget_cache();
-}
-
-/**
- * Implements hook_flush_caches().
- */
-function illuminate_flush_caches() {
-  illuminate_forget_cache();
-  return array();
+  return App::call($controller_action, $params);
 }
 
 /**
@@ -171,21 +116,64 @@ function illuminate_load_instance(){
       'App\Exceptions\Handler'
     );
 
-    Drupal::setContainer(app());
-    drupal_alter('illuminate_load', $loader);
-
     /** @var $kernel Illuminate\Contracts\Http\Kernel */
     $kernel  = $app->make('Illuminate\Contracts\Http\Kernel');
     $request = Illuminate\Http\Request::capture();
     $app->instance('request', $request);
     \Illuminate\Support\Facades\Facade::clearResolvedInstance('request');
     $kernel->bootstrap();
+
+    illuminate_load_services();
+    drupal_alter('illuminate_load', $loader);
+
     $loaded = $kernel;
   }
 
   return $loaded;
 }
 
+/**
+ * Load service provided by module.
+ */
+function illuminate_load_services(){
+  Drupal::setContainer(app());
+
+  app()->bindShared('helper.path', function(){
+    return new \Drupal\Helper\Path\Path();
+  });
+
+  app()->bindShared('content.render', function(){
+    return new \Drupal\Content\ContentRender();
+  });
+
+  app()->bindShared('form_builder', function(){
+    return new Drupal\Core\Form\FormBuilder();
+  });
+
+  app()->bindShared('block.manager', function(){
+    return new \Drupal\Core\Block\BlockManager();
+  });
+
+  \Cache::extend('key_value', function($app)
+  {
+    $config = $app['config']["cache.stores.key_value"];
+    $connection = $app['db']->connection('mysql');
+    $store = new \Drupal\Cache\KeyValueStore($connection, $app['encrypter'], $config['table'], '');
+
+    return \Cache::repository($store);
+  });
+
+  app()->bindShared('key_value', function($app){
+    config(array(
+      'cache.stores.key_value' => array(
+        'driver' => 'key_value',
+        'table'  => 'key_value',
+      )
+    ));
+
+    return \Cache::driver('key_value');
+  });
+}
 
 /**
  * Implements hook_page_delivery_callback_alter().
@@ -335,87 +323,4 @@ function illuminate_deliver_html_page($page_callback_result) {
 
   // Perform end-of-request tasks.
   drupal_page_footer();
-}
-
-
-function illuminate_form($form, &$form_state, $form_handler) {
-  $form_class = illuminate_get_form_handler($form_handler);
-  $form_class->buildForm($form, $form_state);
-
-  $form['illuminate'] = array(
-    '#type' => 'hidden',
-    '#value' => $form_class->getFormId(),
-  );
-
-  return $form;
-}
-
-/**
- * @param $form
- * @param $form_state
- *
- * @return mixed
- * @throws \Exception
- */
-function illuminate_form_validate($form, &$form_state) {
-  if (!isset($form['illuminate'])) {
-    throw new Exception('The submitted form used FormInterface did not specify a FormInterface form handler.');
-  }
-  $form_handler = illuminate_get_form_handler($form['illuminate']['#value']);
-
-  return $form_handler->validateForm($form, $form_state);
-}
-
-/**
- * Form submit handler.
- *
- * @param array $form
- *   The form.
- * @param array $form_state
- *   The form state.
- *
- * @throws \Exception
- * @return mixed
- *   Result of the submitForm operation.
- */
-function illuminate_form_submit($form, &$form_state) {
-  if (!isset($form['illuminate'])) {
-    throw new Exception('The submitted form used FormInterface did not specify a FormInterface form handler.');
-  }
-
-  $form_handler = illuminate_get_form_handler($form['illuminate']['#value']);
-
-  return $form_handler->submitForm($form, $form_state);
-}
-
-/**
- * Construct a form handler.
- *
- * @param string $form_handler
- *   Name of the form handler.
- *
- * @throws Exception
- * @return \Drupal\Core\Form\FormInterface
- *   A Form object.
- */
-function illuminate_get_form_handler($form_handler) {
-  if (is_object($form_handler)) {
-    if ($form_handler instanceof \Drupal\Core\Form\FormInterface) {
-      return $form_handler;
-    }else{
-      throw new Exception('The provided form handler class was not an instance of FormInterface.');
-    }
-  }
-
-  if (!class_exists($form_handler)) {
-    throw new Exception('Could not find form handler class.');
-  }
-
-  $form_handler = new $form_handler();
-
-  if (!$form_handler instanceof \Drupal\Core\Form\FormInterface) {
-    throw new Exception('The provided form handler class was not an instance of FormInterface.');
-  }
-
-  return $form_handler;
 }

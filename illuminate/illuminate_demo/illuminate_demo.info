@@ -4,5 +4,6 @@ package = illuminate
 core = 7.x
 version = 7.x-1.x
 
+dependencies[] = devel
 dependencies[] = illuminate
 dependencies[] = xautoload

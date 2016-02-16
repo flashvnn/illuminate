@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function illuminate_schema() {
+  $schema = array();
+
+  $schema['key_value'] = array(
+    'description' => 'Generic key-value storage table. See the state system for an example.',
+    'fields' => array(
+      'key' => array(
+        'description' => 'A named of cache key.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'A value with cache key.',
+        'type'        => 'text',
+        'size'        => 'big',
+        'serialize'   => FALSE,
+      ),
+      'expiration' => array(
+        'description' => 'The time since Unix epoch in seconds when this item expires. Defaults to the maximum possible time.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 2147483647,
+      ),
+    ),
+    'primary key' => array('key'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function illuminate_install() {
+  db_query("ALTER TABLE {block} CHANGE delta delta VARCHAR(64)");
+}

@@ -15,6 +15,9 @@ class Application extends \Illuminate\Foundation\Application {
     return $this->storagePath ?: drupal_realpath("public://storage");// $this->basePath.DIRECTORY_SEPARATOR.'storage';
   }
 
+  /**
+   * @inheritdoc
+   */
   public function registerConfiguredProviders() {
     $manifestPath = $this->basePath().'/services.json';
 

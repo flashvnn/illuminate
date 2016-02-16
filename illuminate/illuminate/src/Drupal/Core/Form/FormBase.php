@@ -18,7 +18,7 @@ class FormBase implements FormInterface{
    *   The unique string identifying the form.
    */
   public function getFormId() {
-    return get_class($this);
+    return str_replace('\\', '__', get_class($this));
   }
 
   /**
